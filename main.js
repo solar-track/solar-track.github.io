@@ -351,9 +351,16 @@ class SolarTrackDemo {
         // Check if custom drawing mode
         if (gestureName === 'Custom') {
             this.pause();
+            // Disable orientation-aware model for custom trajectories
+            document.getElementById('model-oriented').disabled = true;
+            document.getElementById('model-parallel').checked = true;
+            this.currentModel = 'parallel';
             this.showDrawingInterface();
             return;
         }
+        
+        // Re-enable orientation-aware model for pre-loaded gestures
+        document.getElementById('model-oriented').disabled = false;
         
         try {
             this.pause();
@@ -511,16 +518,18 @@ class SolarTrackDemo {
     updateMetrics() {
         if (!this.currentGestureData) return;
         
-        // Hide metrics if light position is modified
-        if (this.lightPositionModified) {
-            this.elements.metricRmse.textContent = 'RMSE: N/A';
-            this.elements.metricRmse.style.opacity = '0.3';
-            this.elements.metricR2.textContent = 'R²: N/A';
-            this.elements.metricR2.style.opacity = '0.3';
-            this.elements.metricCorr.textContent = 'ρ: N/A';
-            this.elements.metricCorr.style.opacity = '0.3';
+        // Hide metrics if light position is modified or no real power data (custom trajectory)
+        if (this.lightPositionModified || !this.currentGestureData.real_power) {
+            this.elements.metricRmse.style.display = 'none';
+            this.elements.metricR2.style.display = 'none';
+            this.elements.metricCorr.style.display = 'none';
             return;
         }
+        
+        // Show metrics
+        this.elements.metricRmse.style.display = 'inline-block';
+        this.elements.metricR2.style.display = 'inline-block';
+        this.elements.metricCorr.style.display = 'inline-block';
         
         const real = this.currentGestureData.real_power;
         const sim = this.currentGestureData.current_sim;
@@ -528,7 +537,7 @@ class SolarTrackDemo {
         const rmse = calculateRMSE(real, sim) * 1e6; // Convert to μW
         const r2 = calculateR2(real, sim);
         const corr = calculateCorrelation(real, sim);
-        
+
         this.elements.metricRmse.textContent = `RMSE: ${rmse.toFixed(2)} μW`;
         this.elements.metricRmse.style.opacity = '1';
         this.elements.metricR2.textContent = `R²: ${r2.toFixed(3)}`;

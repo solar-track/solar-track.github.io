@@ -19,10 +19,16 @@
         <!-- Header -->
         <header>
             <div class="header-content">
-                <img src="/assets/solartrack_icon.svg" alt="SolarTrack Icon" class="header-icon">
+                <div class="title-row">
+                    <img src="/assets/solartrack_icon.svg" alt="SolarTrack Icon" class="header-icon">
+                    <h1>SolarTrack</h1>
+                </div>
                 <div class="header-text">
-                    <h1>SolarTrack Demo</h1>
-                    <div class="header-buttons">
+                    <p class="subtitle">Exploring the Continuous Tracking Capabilities of Wearable Solar Harvesters</p>
+                    <div class="authors">
+                        <p>Yasien Ghalwash, Abdelwahed Khamis, Moid Sandhu, Sara Khalifa, Raja Jurdak</p>
+                    </div>
+                    <div class="header-buttons" style="display: none;">
                         <a href="#" class="header-btn" id="code-btn">
                             <i class="fab fa-github"></i>
                             Code & Dataset
@@ -57,16 +63,16 @@
 
                     <div class="control-group">
                         <label>
-                            Model: 
+                            Radiometric Model: 
                             <span class="info-icon" data-tooltip="model-info">ⓘ</span>
                         </label>
                         <div class="radio-group">
                             <label>
-                                <input type="radio" name="model" value="oriented" checked>
+                                <input type="radio" name="model" value="oriented" id="model-oriented" checked>
                                 <span>Orientation Aware</span>
                             </label>
                             <label>
-                                <input type="radio" name="model" value="parallel">
+                                <input type="radio" name="model" value="parallel" id="model-parallel">
                                 <span>Parallel Disk</span>
                             </label>
                         </div>
@@ -177,14 +183,17 @@
                         </div>
                     </div>
                     
-                    <!-- Model Equation Box -->
+                    <!-- Background Box -->
                     <div class="equation-box">
-                        <h3>Radiometric Model</h3>
+                        <h3>Background</h3>
+                        <div class="background-description">
+                            <p>This interactive demo visualizes how wearable solar harvesters track hand motion in 3D space. Select a trajectory, adjust the light source position, and observe how the harvested power changes. The simulation is based on a radiometric model that captures the geometric relationship between the hand and light source.</p>
+                        </div>
                         <div class="equation">
                             \[P = \kappa \cdot \mathcal{F}(a, H) + \epsilon\]
                         </div>
                         <div class="equation-description">
-                            <p>The harvested power <strong>P</strong> is a smooth, deterministic function of the cell's lateral displacement <strong>a</strong> and vertical separation <strong>H</strong> (∀ H > 0), scaled by a constant <strong>κ</strong> that captures solar cell and light source properties. <strong>ε</strong> accounts for noise.</p>
+                            <p>The harvested power \(P\) is a smooth, deterministic function of the cell's lateral displacement \(a\) and vertical separation \(H\) (∀ \(H > 0\)), scaled by a constant \(\kappa\) that captures solar cell and light source properties. \(\epsilon\) accounts for noise.</p>
                         </div>
                     </div>
                 </div>
