@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SolarTrack Demo</title>
+    <link rel="icon" type="image/svg+xml" href="./assets/solartrack_icon.svg">
+    <link rel="stylesheet" href="./style.css">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- MathJax for LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header>
+            <div class="header-content">
+                <img src="./assets/solartrack_icon.svg" alt="SolarTrack Icon" class="header-icon">
+                <div class="header-text">
+                    <h1>SolarTrack Demo</h1>
+                    <div class="header-buttons">
+                        <a href="#" class="header-btn" id="code-btn">
+                            <i class="fab fa-github"></i>
+                            Code & Dataset
+                        </a>
+                        <a href="#" class="header-btn" id="paper-btn">
+                            <i class="fas fa-file-alt"></i>
+                            Paper
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main container -->
+        <div class="container">
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <div class="control-section">
+                    <h3>Controls</h3>
+                    
+                    <div class="control-group">
+                        <label for="gesture-select">Trajectory:</label>
+                        <select id="gesture-select">
+                            <option value="Circle">Circle</option>
+                            <option value="One">One</option>
+                            <option value="Two">Two</option>
+                            <option value="Three">Three</option>
+                            <option value="Triangle">Triangle</option>
+                            <option value="Custom">Custom (Draw Your Own)</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label>
+                            Model: 
+                            <span class="info-icon" data-tooltip="model-info">ⓘ</span>
+                        </label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="model" value="oriented" checked>
+                                <span>Orientation Aware</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="model" value="parallel">
+                                <span>Parallel Disk</span>
+                            </label>
+                        </div>
+                        
+                        <!-- Tooltip -->
+                        <div id="model-info-tooltip" class="tooltip-content" style="display: none;">
+                            <strong>Orientation Aware:</strong> Accounts for hand orientation using Lambert's cosine law. Power depends on the angle between the cell normal and light direction (P ∝ cos θ).
+                            <br><br>
+                            <strong>Parallel Disk:</strong> Simplified model assuming the palm normal always points upward, ignoring orientation effects.
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Light Position:</label>
+                        <div class="slider-group">
+                            <label>X (mm): <span id="light-x-value">-159.8</span></label>
+                            <input type="range" id="light-x" min="-500" max="500" value="-159.81" step="1">
+                        </div>
+                        <div class="slider-group">
+                            <label>Y (mm): <span id="light-y-value">868.8</span></label>
+                            <input type="range" id="light-y" min="500" max="1200" value="868.82" step="1">
+                        </div>
+                        <div class="slider-group">
+                            <label>Z (mm): <span id="light-z-value">168.2</span></label>
+                            <input type="range" id="light-z" min="-500" max="500" value="168.23" step="1">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Animation:</label>
+                        <div class="button-group">
+                            <button id="play-btn" class="btn btn-primary">▶ Play</button>
+                            <button id="pause-btn" class="btn btn-secondary" disabled>⏸ Pause</button>
+                            <button id="reset-btn" class="btn btn-secondary">⏮ Reset</button>
+                        </div>
+                        <div class="slider-group">
+                            <label>Speed: <span id="speed-value">1.0</span>x</label>
+                            <input type="range" id="speed" min="0.5" max="3" value="1" step="0.5">
+                        </div>
+                        <div class="progress-container">
+                            <div id="progress-bar" class="progress-bar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visualization Area -->
+            <div class="viz-container">
+                <!-- 3D Scene and Equation Box Row -->
+                <div class="top-row">
+                    <!-- 3D Scene with state overlay -->
+                    <div class="scene-wrapper">
+                        <div id="scene-container" class="scene-container"></div>
+                        
+                        <!-- Drawing Canvas Overlay (hidden by default) -->
+                        <div id="drawing-overlay" class="drawing-overlay" style="display: none;">
+                            <div class="drawing-instructions">
+                                <h3>Draw Your Trajectory</h3>
+                                <p>Click and drag to draw a path with your mouse</p>
+                            </div>
+                            <canvas id="drawing-canvas"></canvas>
+                            <div class="drawing-controls">
+                                <button id="drawing-done-btn" class="btn btn-primary">✓ Done</button>
+                                <button id="drawing-clear-btn" class="btn btn-secondary">↻ Clear</button>
+                                <button id="drawing-cancel-btn" class="btn btn-secondary">✕ Cancel</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Current State Display (overlay on 3D scene) -->
+                        <div class="state-display-overlay">
+                            <h3>
+                                Current State
+                                <span class="info-icon" data-tooltip="current-state">ⓘ</span>
+                            </h3>
+                            <div class="state-values">
+                                <div class="state-item">
+                                    <span class="state-label">a =</span>
+                                    <span id="state-a" class="state-value">0.0</span>
+                                    <span class="state-unit">mm</span>
+                                </div>
+                                <div class="state-item">
+                                    <span class="state-label">H =</span>
+                                    <span id="state-h" class="state-value">0.0</span>
+                                    <span class="state-unit">mm</span>
+                                </div>
+                                <div class="state-item" id="theta-state-item">
+                                    <span class="state-label">θ =</span>
+                                    <span id="state-theta" class="state-value">0.0</span>
+                                    <span class="state-unit">°</span>
+                                </div>
+                                <div class="state-item">
+                                    <span class="state-label">Power =</span>
+                                    <span id="state-power" class="state-value">0.0</span>
+                                    <span class="state-unit">μW</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Tooltip -->
+                            <div id="current-state-tooltip" class="tooltip-content" style="display: none;">
+                                <strong>a:</strong> Lateral offset - horizontal distance between hand and light source in the XZ plane (mm).
+                                <br><br>
+                                <strong>H:</strong> Height - vertical separation between hand and light source (mm).
+                                <br><br>
+                                <strong>θ:</strong> Incidence angle - angle between the solar cell normal and the light direction vector (degrees). Smaller angles mean more direct light.
+                                <br><br>
+                                <strong>Power:</strong> Current simulated power received by the solar cell (μW).
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Model Equation Box -->
+                    <div class="equation-box">
+                        <h3>Radiometric Model</h3>
+                        <div class="equation">
+                            \[P = \kappa \cdot \mathcal{F}(a, H) + \epsilon\]
+                        </div>
+                        <div class="equation-description">
+                            <p>The harvested power <strong>P</strong> is a smooth, deterministic function of the cell's lateral displacement <strong>a</strong> and vertical separation <strong>H</strong> (∀ H > 0), scaled by a constant <strong>κ</strong> that captures solar cell and light source properties. <strong>ε</strong> accounts for noise.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Power Chart -->
+                <div class="chart-container">
+                    <canvas id="power-chart"></canvas>
+                    <div class="metrics">
+                        <span id="metric-rmse">RMSE: 0.0 μW</span>
+                        <span id="metric-r2">R²: 0.000</span>
+                        <span id="metric-corr">ρ: 0.000</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+</body>
+</html>
+
