@@ -158,6 +158,76 @@ class SolarTrackDemo {
         
         // Header buttons (URLs can be updated later)
         this.setupHeaderButtons();
+        
+        // Mobile controls
+        this.setupMobileControls();
+    }
+    
+    setupMobileControls() {
+        // Mobile gesture selector
+        const mobileGestureSelect = document.getElementById('mobile-gesture-select');
+        if (mobileGestureSelect) {
+            mobileGestureSelect.addEventListener('change', (e) => {
+                this.elements.gestureSelect.value = e.target.value;
+                this.loadGesture(e.target.value);
+            });
+        }
+        
+        // Mobile model selector
+        const modelBtns = document.querySelectorAll('.model-btn');
+        modelBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const model = btn.dataset.model;
+                modelBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Sync with desktop radio buttons
+                if (model === 'oriented') {
+                    document.getElementById('model-oriented').checked = true;
+                } else {
+                    document.getElementById('model-parallel').checked = true;
+                }
+                
+                this.currentModel = model;
+                this.recomputeSimulation();
+            });
+        });
+        
+        // Mobile animation controls
+        const mobilePlayBtn = document.getElementById('mobile-play-btn');
+        const mobilePauseBtn = document.getElementById('mobile-pause-btn');
+        const mobileResetBtn = document.getElementById('mobile-reset-btn');
+        
+        if (mobilePlayBtn) mobilePlayBtn.addEventListener('click', () => this.play());
+        if (mobilePauseBtn) mobilePauseBtn.addEventListener('click', () => this.pause());
+        if (mobileResetBtn) mobileResetBtn.addEventListener('click', () => this.reset());
+        
+        // Mobile light position arrows
+        const arrowBtns = document.querySelectorAll('.arrow-btn');
+        arrowBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const axis = btn.dataset.axis;
+                const dir = parseInt(btn.dataset.dir);
+                const step = 20; // 20mm per click
+                
+                if (axis === 'x') {
+                    this.lightPosition[0] += dir * step;
+                    this.elements.lightXSlider.value = this.lightPosition[0];
+                    this.elements.lightXValue.textContent = this.lightPosition[0].toFixed(1);
+                } else if (axis === 'y') {
+                    this.lightPosition[1] += dir * step;
+                    this.elements.lightYSlider.value = this.lightPosition[1];
+                    this.elements.lightYValue.textContent = this.lightPosition[1].toFixed(1);
+                } else if (axis === 'z') {
+                    this.lightPosition[2] += dir * step;
+                    this.elements.lightZSlider.value = this.lightPosition[2];
+                    this.elements.lightZValue.textContent = this.lightPosition[2].toFixed(1);
+                }
+                
+                this.checkLightPositionModified();
+                this.updateLightPosition();
+            });
+        });
     }
     
     setupHeaderButtons() {
@@ -602,6 +672,12 @@ class SolarTrackDemo {
         this.elements.playBtn.disabled = true;
         this.elements.pauseBtn.disabled = false;
         
+        // Sync mobile buttons
+        const mobilePlayBtn = document.getElementById('mobile-play-btn');
+        const mobilePauseBtn = document.getElementById('mobile-pause-btn');
+        if (mobilePlayBtn) mobilePlayBtn.disabled = true;
+        if (mobilePauseBtn) mobilePauseBtn.disabled = false;
+        
         this.animate();
     }
     
@@ -609,6 +685,12 @@ class SolarTrackDemo {
         this.isPlaying = false;
         this.elements.playBtn.disabled = false;
         this.elements.pauseBtn.disabled = true;
+        
+        // Sync mobile buttons
+        const mobilePlayBtn = document.getElementById('mobile-play-btn');
+        const mobilePauseBtn = document.getElementById('mobile-pause-btn');
+        if (mobilePlayBtn) mobilePlayBtn.disabled = false;
+        if (mobilePauseBtn) mobilePauseBtn.disabled = true;
         
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);

@@ -127,6 +127,51 @@
                     <div class="scene-wrapper">
                         <div id="scene-container" class="scene-container"></div>
                         
+                        <!-- Mobile-only floating controls -->
+                        <div class="mobile-controls">
+                            <!-- Top-left: Trajectory selector -->
+                            <div class="mobile-control mobile-trajectory">
+                                <select id="mobile-gesture-select">
+                                    <option value="Circle">Circle</option>
+                                    <option value="One">One</option>
+                                    <option value="Two">Two</option>
+                                    <option value="Three">Three</option>
+                                    <option value="Triangle">Triangle</option>
+                                    <option value="Custom">Custom</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Top-right: Model selector -->
+                            <div class="mobile-control mobile-model">
+                                <button class="model-btn active" data-model="oriented" title="Orientation Aware">📐</button>
+                                <button class="model-btn" data-model="parallel" title="Parallel Disk">⊥</button>
+                            </div>
+                            
+                            <!-- Bottom-center: Animation controls -->
+                            <div class="mobile-control mobile-animation">
+                                <button class="anim-btn" id="mobile-play-btn" title="Play">▶</button>
+                                <button class="anim-btn" id="mobile-pause-btn" title="Pause" disabled>⏸</button>
+                                <button class="anim-btn" id="mobile-reset-btn" title="Reset">⏮</button>
+                            </div>
+                            
+                            <!-- Light position arrows -->
+                            <div class="mobile-control mobile-light-arrows">
+                                <div class="arrow-group">
+                                    <button class="arrow-btn arrow-up" data-axis="y" data-dir="1" title="Move Light Up">↑</button>
+                                    <div class="arrow-row">
+                                        <button class="arrow-btn arrow-left" data-axis="x" data-dir="-1" title="Move Light Left">←</button>
+                                        <div class="arrow-center">💡</div>
+                                        <button class="arrow-btn arrow-right" data-axis="x" data-dir="1" title="Move Light Right">→</button>
+                                    </div>
+                                    <button class="arrow-btn arrow-down" data-axis="y" data-dir="-1" title="Move Light Down">↓</button>
+                                </div>
+                                <div class="arrow-z">
+                                    <button class="arrow-btn arrow-forward" data-axis="z" data-dir="1" title="Move Light Forward">▲</button>
+                                    <button class="arrow-btn arrow-back" data-axis="z" data-dir="-1" title="Move Light Back">▼</button>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <!-- Drawing Canvas Overlay (hidden by default) -->
                         <div id="drawing-overlay" class="drawing-overlay" style="display: none;">
                             <div class="drawing-instructions">
