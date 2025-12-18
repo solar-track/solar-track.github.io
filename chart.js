@@ -261,7 +261,7 @@ export class PowerChart {
         this.chart.options.scales.x.max = undefined;
         this.chart.options.scales.y.min = undefined;
         this.chart.options.scales.y.max = undefined;
-        this.chart.update('active'); // Use 'active' animation for smooth transition
+        this.chart.update('none'); // No animation to avoid showing data points
         console.log('Chart zoom reset');
     }
     
