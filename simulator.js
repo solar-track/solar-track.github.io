@@ -231,6 +231,62 @@ export function simulateSolarPower(
 }
 
 /**
+ * Calculate scaling factor κ (kappa) using least squares.
+ * Minimizes error: P_real = κ × F(a,H)
+ * 
+ * @param {Array<number>} viewFactors - Simulated view factors
+ * @param {Array<number>} realPower - Real measured power values
+ * @returns {number} Optimal κ value
+ */
+export function calculateKappa(viewFactors, realPower) {
+    if (!viewFactors || !realPower || viewFactors.length !== realPower.length) {
+        throw new Error('Invalid input for kappa calculation');
+    }
+    
+    // Least squares solution: κ = (F·P) / (F·F)
+    const numerator = viewFactors.reduce((sum, f, i) => 
+        sum + f * realPower[i], 0
+    );
+    const denominator = viewFactors.reduce((sum, f) => 
+        sum + f * f, 0
+    );
+    
+    if (denominator === 0) {
+        throw new Error('Cannot calculate kappa: zero denominator');
+    }
+    
+    return numerator / denominator;
+}
+
+/**
+ * Apply kappa scaling to view factors.
+ * 
+ * @param {Array<number>} viewFactors - Simulated view factors
+ * @param {number} kappa - Scaling factor
+ * @returns {Array<number>} Scaled power values
+ */
+export function applyKappaScaling(viewFactors, kappa) {
+    return viewFactors.map(f => kappa * f);
+}
+
+/**
+ * Calculate kappa from physical parameters.
+ * κ = efficiency × cell_area × light_intensity
+ * 
+ * @param {number} efficiency - Solar cell efficiency (0-1, e.g., 0.15 for 15%)
+ * @param {number} cellArea - Cell area in m²
+ * @param {number} lightPower - Light source power in Watts
+ * @returns {number} Calculated κ value
+ */
+export function calculateKappaFromPhysics(efficiency, cellArea, lightPower) {
+    // κ ≈ η × A × I₀
+    // Where I₀ is the effective irradiance
+    // Simplified model: κ = η × A × (P_light / effective_area)
+    // For a point source, this is an approximation
+    return efficiency * cellArea * lightPower * 1e-3; // Scale factor for typical setup
+}
+
+/**
  * Apply per-segment scaling to match simulated power to real power range.
  * Matches apply_per_segment_scaling() from Python.
  * 

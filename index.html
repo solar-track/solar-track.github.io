@@ -230,6 +230,13 @@
                                     <span id="state-power" class="state-value">0.0</span>
                                     <span class="state-unit">μW</span>
                                 </div>
+                                <div class="state-item" id="kappa-state-item" style="display: none;">
+                                    <span class="state-label">κ =</span>
+                                    <span id="state-kappa" class="state-value">0.0</span>
+                                    <button id="kappa-edit-btn" class="kappa-edit-btn" title="Configure κ">
+                                        <i class="fas fa-cog"></i>
+                                    </button>
+                                </div>
                             </div>
                             
                             <!-- Tooltip -->
@@ -275,6 +282,79 @@
                         <span id="metric-corr">ρ: 0.000</span>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kappa Configuration Modal -->
+    <div id="kappa-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⚙️ Configure Scaling Factor (κ)</h3>
+                <button class="modal-close" id="kappa-modal-close">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="kappa-info">
+                    <p><strong>Current κ:</strong> <span id="modal-current-kappa">0.0</span></p>
+                    <p><strong>Source:</strong> <span id="modal-kappa-source">N/A</span></p>
+                    <p class="kappa-note">κ is a constant for a given solar cell and light source setup.</p>
+                </div>
+                
+                <div class="kappa-options">
+                    <div class="radio-option">
+                        <input type="radio" id="kappa-use-calculated" name="kappa-method" value="calculated" checked>
+                        <label for="kappa-use-calculated">
+                            <strong>Use Calculated κ (from Real Data)</strong>
+                            <span class="option-desc">Least-squares fit minimizes error between real and simulated power</span>
+                        </label>
+                        <div class="calculated-info" id="calculated-kappa-info">
+                            <p>Calculated κ: <span id="calculated-kappa-value">0.0</span></p>
+                            <p>RMSE: <span id="calculated-rmse-value">0.0</span> μW</p>
+                        </div>
+                    </div>
+                    
+                    <div class="radio-option">
+                        <input type="radio" id="kappa-manual" name="kappa-method" value="manual">
+                        <label for="kappa-manual">
+                            <strong>Manual Input</strong>
+                            <span class="option-desc">Enter custom κ value (e.g., from calibration)</span>
+                        </label>
+                        <div class="manual-input-group" id="manual-kappa-group" style="display: none;">
+                            <input type="text" id="manual-kappa-input" placeholder="e.g., 2.45e-4">
+                            <span class="input-hint">Use scientific notation (e.g., 2.45e-4)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="radio-option">
+                        <input type="radio" id="kappa-physics" name="kappa-method" value="physics">
+                        <label for="kappa-physics">
+                            <strong>Calculate from Physical Parameters</strong>
+                            <span class="option-desc">Enter cell and light source properties</span>
+                        </label>
+                        <div class="physics-input-group" id="physics-kappa-group" style="display: none;">
+                            <div class="input-row">
+                                <label>Solar cell efficiency (%):</label>
+                                <input type="number" id="physics-efficiency" value="15" min="0" max="100" step="0.1">
+                            </div>
+                            <div class="input-row">
+                                <label>Cell area (cm²):</label>
+                                <input type="number" id="physics-area" value="25" min="0" step="0.1">
+                            </div>
+                            <div class="input-row">
+                                <label>Light source power (W):</label>
+                                <input type="number" id="physics-power" value="100" min="0" step="1">
+                            </div>
+                            <p class="calculated-result">Calculated κ: <span id="physics-kappa-result">0.0</span></p>
+                            <button type="button" id="calculate-physics-btn" class="btn btn-secondary">Calculate</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="kappa-cancel-btn">Cancel</button>
+                <button class="btn btn-primary" id="kappa-apply-btn">Apply & Update</button>
             </div>
         </div>
     </div>

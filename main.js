@@ -12,6 +12,9 @@ import { CSVUploader } from './csvUploader.js';
 import {
     simulateSolarPower,
     applyPerSegmentScaling,
+    calculateKappa,
+    applyKappaScaling,
+    calculateKappaFromPhysics,
     calculateRMSE,
     calculateR2,
     calculateCorrelation,
@@ -590,13 +593,20 @@ class SolarTrackDemo {
             CONSTANTS.SOURCE_DIAMETER
         );
         
-        // Scale power to match real data if available, otherwise use reasonable range
-        let scaledOriented, scaledParallel;
+        // Scale power: Use κ-based scaling for uploaded files with real power
+        let scaledOriented, scaledParallel, kappa, kappaSource, scalingMethod;
         
         if (gestureData.real_power && gestureData.real_power.length === numSamples) {
-            // Scale to match real power
-            scaledOriented = applyPerSegmentScaling(resultOriented.power, gestureData.real_power);
-            scaledParallel = applyPerSegmentScaling(resultParallel.power, gestureData.real_power);
+            // Calculate κ using least squares
+            kappa = calculateKappa(resultOriented.power, gestureData.real_power);
+            console.log(`✓ Calculated κ = ${kappa.toExponential(3)} for ${gestureData.name}`);
+            
+            // Apply κ scaling
+            scaledOriented = applyKappaScaling(resultOriented.power, kappa);
+            scaledParallel = applyKappaScaling(resultParallel.power, kappa);
+            
+            kappaSource = 'calculated';
+            scalingMethod = 'kappa';
         } else {
             // Scale to reasonable range (20-80 μW) if no real power data
             const scaleToRange = (power) => {
@@ -611,6 +621,10 @@ class SolarTrackDemo {
             
             scaledOriented = scaleToRange(resultOriented.power);
             scaledParallel = scaleToRange(resultParallel.power);
+            
+            kappa = null;
+            kappaSource = null;
+            scalingMethod = 'range';
         }
         
         // Create full gesture data object
@@ -626,10 +640,16 @@ class SolarTrackDemo {
             current_H: resultOriented.H_values,
             num_samples: numSamples,
             sampling_rate: samplingRate,
+            timestamps: gestureData.timestamps,
             light_source: {
                 position: [...this.lightPosition],
                 diameter: CONSTANTS.SOURCE_DIAMETER
             },
+            kappa: kappa,                    // Scaling factor (null if not used)
+            kappa_source: kappaSource,       // 'calculated', 'manual', 'physics', or null
+            scaling_method: scalingMethod,   // 'kappa' or 'range'
+            raw_view_factors_oriented: resultOriented.power,  // Store for recalculation
+            raw_view_factors_parallel: resultParallel.power,
             isUploaded: true
         };
         
@@ -795,6 +815,18 @@ class SolarTrackDemo {
         this.elements.stateH.textContent = H.toFixed(1);
         this.elements.stateTheta.textContent = theta.toFixed(1);
         this.elements.statePower.textContent = (power * 1e6).toFixed(2);
+        
+        // Update κ display (only for uploaded files with kappa scaling)
+        const kappaItem = document.getElementById('kappa-state-item');
+        const kappaValue = document.getElementById('state-kappa');
+        
+        if (this.currentGestureData.kappa !== null && this.currentGestureData.kappa !== undefined &&
+            this.currentGestureData.scaling_method === 'kappa') {
+            kappaItem.style.display = 'flex';
+            kappaValue.textContent = this.currentGestureData.kappa.toExponential(2);
+        } else {
+            kappaItem.style.display = 'none';
+        }
     }
     
     play() {
