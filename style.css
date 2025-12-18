@@ -532,6 +532,12 @@ input[type="range"]::-moz-range-thumb {
     font-size: 14px;
 }
 
+.drawing-hint {
+    color: #F7941D !important;
+    font-weight: 600;
+    margin-top: 8px !important;
+}
+
 #drawing-canvas {
     border: 3px dashed #7B68A6;
     background: white;

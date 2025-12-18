@@ -200,20 +200,35 @@ export class DrawingHandler {
         const positions = [];
         const normals = [];
         
-        // Map canvas space to 3D space - VERTICAL PLANE (XY)
-        // Canvas X → World X (lateral position)
+        // Map canvas space to 3D space - VERTICAL PLANE (XY) with 3D depth variation
+        // Canvas X → World X (lateral position, centered at 0)
         // Canvas Y → World Y (height, inverted - top of canvas = high Y)
-        // Z = 0 (centerline, perpendicular to light direction)
+        // Canvas Y also → World Z (depth): top = closer to light, bottom = further
+        //
+        // Goal: Position trajectory near light source at [-160, 869, 168]
+        // - X range: -200 to +200 mm (centered at 0, close to light's -160)
+        // - Y range: 500 to 800 mm (approaching light's height ~869)
+        // - Z range: 100 to 200 mm (closer to light's Z=168)
+        //   - Top of canvas → Z=200 (approaching light)
+        //   - Bottom → Z=100 (receding from light)
+        
         const centerX = this.canvas.width / 2;
         const scaleX = 400 / this.canvas.width;   // ~400mm lateral range
-        const scaleY = 400 / this.canvas.height;  // ~400mm vertical range
-        const baseHeight = 400; // Base height (bottom of canvas)
+        const scaleY = 300 / this.canvas.height;  // ~300mm vertical range
+        const baseHeight = 500; // Base height (bottom of canvas)
         
-        for (const point of resampledPoints) {
-            // Map canvas to 3D (XY vertical plane)
+        for (let i = 0; i < resampledPoints.length; i++) {
+            const point = resampledPoints[i];
+            
+            // Map canvas to 3D (XY vertical plane + Z depth)
             const x = (point.x - centerX) * scaleX;
             const y = baseHeight + (this.canvas.height - point.y) * scaleY; // Invert Y
-            const z = 0; // Centerline
+            
+            // Add 3D depth variation based on Y position in canvas
+            // Top of canvas (point.y = 0) → normalized = 0 → Z = 200 (closer to light)
+            // Bottom of canvas (point.y = height) → normalized = 1 → Z = 100 (further)
+            const normalizedY = point.y / this.canvas.height; // 0 at top, 1 at bottom
+            const z = 200 - normalizedY * 100; // Z range: 200 (top) to 100 (bottom)
             
             positions.push([x, y, z]);
             
@@ -221,6 +236,12 @@ export class DrawingHandler {
             // So cell normal (back of hand) = -palm_normal = [0, 1, 0] points UP towards light
             normals.push([0, -1, 0]);
         }
+        
+        console.log('✓ Custom trajectory converted to 3D:');
+        console.log(`  X range: ${Math.min(...positions.map(p => p[0])).toFixed(1)} to ${Math.max(...positions.map(p => p[0])).toFixed(1)} mm`);
+        console.log(`  Y range: ${Math.min(...positions.map(p => p[1])).toFixed(1)} to ${Math.max(...positions.map(p => p[1])).toFixed(1)} mm`);
+        console.log(`  Z range: ${Math.min(...positions.map(p => p[2])).toFixed(1)} to ${Math.max(...positions.map(p => p[2])).toFixed(1)} mm`);
+        console.log(`  (Draw upward ↑ to approach light 💡)`);
         
         return { positions, normals };
     }
