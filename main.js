@@ -31,6 +31,7 @@ class SolarTrackDemo {
         
         // Data
         this.currentGestureData = null;
+        this.uploadedGestureCache = null; // Cache for uploaded CSV data
         this.currentModel = 'oriented';
         this.lightPosition = [...CONSTANTS.SOURCE_CENTER];
         this.originalLightPosition = [...CONSTANTS.SOURCE_CENTER];
@@ -445,6 +446,18 @@ class SolarTrackDemo {
             return;
         }
         
+        // Check if this is an uploaded file - restore from cache
+        if (gestureName === 'Uploaded') {
+            if (this.uploadedGestureCache) {
+                console.log('Restoring uploaded gesture from cache...');
+                this.loadUploadedGesture(this.uploadedGestureCache);
+                return;
+            } else {
+                alert('Uploaded data not found. Please upload the file again.');
+                return;
+            }
+        }
+        
         // Re-enable orientation-aware model for pre-loaded gestures
         document.getElementById('model-oriented').disabled = false;
         
@@ -570,6 +583,9 @@ class SolarTrackDemo {
     
     loadUploadedGesture(gestureData) {
         console.log(`Loading uploaded gesture: ${gestureData.name} (${gestureData.positions.length} samples)`);
+        
+        // Cache the uploaded gesture data for later restoration
+        this.uploadedGestureCache = gestureData;
         
         this.pause();
         
