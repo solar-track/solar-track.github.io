@@ -8,6 +8,7 @@
 import { Scene3D } from './scene3d.js';
 import { PowerChart } from './chart.js';
 import { DrawingHandler } from './drawingHandler.js';
+import { CSVUploader } from './csvUploader.js';
 import {
     simulateSolarPower,
     applyPerSegmentScaling,
@@ -23,6 +24,7 @@ class SolarTrackDemo {
         this.scene3d = null;
         this.powerChart = null;
         this.drawingHandler = null;
+        this.csvUploader = null;
         
         // Data
         this.currentGestureData = null;
@@ -67,6 +69,10 @@ class SolarTrackDemo {
         // Initialize drawing handler
         this.drawingHandler = new DrawingHandler();
         console.log('✓ Drawing Handler initialized');
+        
+        // Initialize CSV uploader
+        this.csvUploader = new CSVUploader(this);
+        console.log('✓ CSV Uploader initialized');
         
         // Setup event listeners
         this.setupEventListeners();
@@ -550,6 +556,128 @@ class SolarTrackDemo {
         if (this.currentFrame < this.currentGestureData.num_samples) {
             this.updateStateDisplay(this.currentFrame);
         }
+    }
+    
+    loadUploadedGesture(gestureData) {
+        console.log(`Loading uploaded gesture: ${gestureData.name} (${gestureData.positions.length} samples)`);
+        
+        this.pause();
+        
+        // Prepare gesture data in the format expected by the app
+        const numSamples = gestureData.positions.length;
+        const samplingRate = gestureData.timestamps 
+            ? 1.0 / (gestureData.timestamps[1] - gestureData.timestamps[0])
+            : 30.0; // Default 30 fps
+        
+        // Simulate with current model
+        const resultOriented = simulateSolarPower(
+            gestureData.positions,
+            gestureData.normals,
+            'oriented',
+            this.lightPosition,
+            CONSTANTS.SOURCE_DIAMETER
+        );
+        
+        const resultParallel = simulateSolarPower(
+            gestureData.positions,
+            gestureData.normals,
+            'parallel',
+            this.lightPosition,
+            CONSTANTS.SOURCE_DIAMETER
+        );
+        
+        // Scale power to match real data if available, otherwise use reasonable range
+        let scaledOriented, scaledParallel;
+        
+        if (gestureData.real_power && gestureData.real_power.length === numSamples) {
+            // Scale to match real power
+            scaledOriented = applyPerSegmentScaling(resultOriented.power, gestureData.real_power);
+            scaledParallel = applyPerSegmentScaling(resultParallel.power, gestureData.real_power);
+        } else {
+            // Scale to reasonable range (20-80 μW) if no real power data
+            const scaleToRange = (power) => {
+                const minP = Math.min(...power);
+                const maxP = Math.max(...power);
+                const range = maxP - minP;
+                if (range > 0) {
+                    return power.map(p => ((p - minP) / range) * 60 + 20).map(p => p * 1e-6);
+                }
+                return power.map(() => 50 * 1e-6);
+            };
+            
+            scaledOriented = scaleToRange(resultOriented.power);
+            scaledParallel = scaleToRange(resultParallel.power);
+        }
+        
+        // Create full gesture data object
+        this.currentGestureData = {
+            name: gestureData.name,
+            positions: gestureData.positions,
+            normals: gestureData.normals,
+            real_power: gestureData.real_power, // May be null
+            sim_oriented: scaledOriented,
+            sim_parallel: scaledParallel,
+            current_sim: scaledOriented,
+            current_a: resultOriented.a_values,
+            current_H: resultOriented.H_values,
+            num_samples: numSamples,
+            sampling_rate: samplingRate,
+            light_source: {
+                position: [...this.lightPosition],
+                diameter: CONSTANTS.SOURCE_DIAMETER
+            },
+            isUploaded: true
+        };
+        
+        // Update gesture selector to show "Uploaded"
+        const gestureSelect = document.getElementById('gesture-select');
+        const mobileGestureSelect = document.getElementById('mobile-gesture-select');
+        
+        // Add "Uploaded" option if not exists
+        if (!gestureSelect.querySelector('option[value="Uploaded"]')) {
+            const option = document.createElement('option');
+            option.value = 'Uploaded';
+            option.textContent = gestureData.name;
+            gestureSelect.appendChild(option);
+            
+            const mobileOption = option.cloneNode(true);
+            mobileGestureSelect.appendChild(mobileOption);
+        } else {
+            // Update existing option text
+            gestureSelect.querySelector('option[value="Uploaded"]').textContent = gestureData.name;
+            mobileGestureSelect.querySelector('option[value="Uploaded"]').textContent = gestureData.name;
+        }
+        
+        gestureSelect.value = 'Uploaded';
+        mobileGestureSelect.value = 'Uploaded';
+        
+        // Re-enable orientation-aware model for uploaded data
+        document.getElementById('model-oriented').disabled = false;
+        
+        // Update 3D visualization
+        this.scene3d.setTrajectory(
+            this.currentGestureData.positions,
+            this.currentGestureData.normals,
+            this.currentGestureData.current_sim
+        );
+        
+        // Update chart
+        this.powerChart.updateData(
+            this.currentGestureData.real_power,
+            this.currentGestureData.current_sim,
+            this.currentGestureData.sampling_rate,
+            this.lightPositionModified && this.currentGestureData.real_power !== null,
+            false // Not custom
+        );
+        
+        // Update metrics
+        this.updateMetrics();
+        
+        // Reset animation
+        this.currentFrame = 0;
+        this.updateFrame();
+        
+        console.log('✓ Uploaded gesture loaded successfully');
     }
     
     updateVisualization() {

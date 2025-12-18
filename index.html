@@ -61,6 +61,18 @@
                         </select>
                     </div>
 
+                    <div class="control-group csv-upload-group">
+                        <label>Upload Motion Data:</label>
+                        <button id="upload-csv-btn" class="btn btn-upload">
+                            <i class="fas fa-file-csv"></i> Upload CSV
+                        </button>
+                        <input type="file" id="csv-input" accept=".csv" style="display: none;">
+                        <div id="upload-status" class="status-message" style="display: none;"></div>
+                        <div class="upload-notice">
+                            ℹ️ Your CSV file is processed entirely in your browser. No data is uploaded to our servers.
+                        </div>
+                    </div>
+
                     <div class="control-group">
                         <label>
                             Radiometric Model: 
