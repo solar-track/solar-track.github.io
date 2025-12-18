@@ -263,15 +263,13 @@
                 <!-- Power Chart -->
                 <div class="chart-container">
                     <canvas id="power-chart"></canvas>
-                    <div class="chart-footer">
-                        <div class="metrics">
-                            <span id="metric-rmse">RMSE: 0.0 μW</span>
-                            <span id="metric-r2">R²: 0.000</span>
-                            <span id="metric-corr">ρ: 0.000</span>
-                        </div>
-                        <button id="export-csv-btn" class="btn-export" title="Export Power Trace as CSV">
-                            <i class="fas fa-download"></i> Export CSV
-                        </button>
+                    <button id="export-csv-btn" class="btn-export-overlay" title="Export Power Trace as CSV">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <div class="metrics">
+                        <span id="metric-rmse">RMSE: 0.0 μW</span>
+                        <span id="metric-r2">R²: 0.000</span>
+                        <span id="metric-corr">ρ: 0.000</span>
                     </div>
                 </div>
             </div>

@@ -648,6 +648,7 @@ input[type="range"]::-moz-range-thumb {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     height: 300px;
     position: relative;
+    position: relative;
 }
 
 #power-chart {
@@ -655,18 +656,12 @@ input[type="range"]::-moz-range-thumb {
     height: 240px !important;
 }
 
-/* Chart Footer */
-.chart-footer {
+.metrics {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: space-around;
     margin-top: 10px;
     padding-top: 10px;
     border-top: 2px solid #ecf0f1;
-}
-
-.metrics {
-    display: flex;
     gap: 20px;
 }
 
@@ -676,31 +671,37 @@ input[type="range"]::-moz-range-thumb {
     font-size: 14px;
 }
 
-/* Export Button */
-.btn-export {
-    padding: 8px 16px;
-    background: #7B68A6;
+/* Export Button Overlay */
+.btn-export-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background: rgba(123, 104, 166, 0.9);
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 16px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    backdrop-filter: blur(4px);
 }
 
-.btn-export:hover {
-    background: #6A5795;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+.btn-export-overlay:hover {
+    background: rgba(106, 87, 149, 1);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.btn-export:active {
-    transform: translateY(0);
+.btn-export-overlay:active {
+    transform: scale(0.95);
 }
 
 /* Equation Box */
