@@ -14,8 +14,10 @@ export class PowerChart {
         this.canvas = canvasElement;
         this.chart = null;
         this.timeCursorPlugin = null;
+        this.resetZoomBtn = null;
         
         this.init();
+        this.setupResetZoomButton();
     }
     
     init() {
@@ -244,6 +246,23 @@ export class PowerChart {
     clearCursor() {
         this.chart.options.plugins.timeCursor.currentIndex = null;
         this.chart.update('none');
+    }
+    
+    setupResetZoomButton() {
+        this.resetZoomBtn = document.getElementById('reset-zoom-btn');
+        if (this.resetZoomBtn) {
+            this.resetZoomBtn.addEventListener('click', () => this.resetZoom());
+        }
+    }
+    
+    resetZoom() {
+        // Reset both axes to show full data range
+        this.chart.options.scales.x.min = undefined;
+        this.chart.options.scales.x.max = undefined;
+        this.chart.options.scales.y.min = undefined;
+        this.chart.options.scales.y.max = undefined;
+        this.chart.update('active'); // Use 'active' animation for smooth transition
+        console.log('Chart zoom reset');
     }
     
     dispose() {
