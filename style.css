@@ -132,21 +132,21 @@ header p {
 .control-panel {
     background: white;
     border-radius: 10px;
-    padding: 20px;
+    padding: 16px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     height: fit-content;
 }
 
 .control-section h3,
 .state-display h3 {
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     color: #2c3e50;
     border-bottom: 2px solid #7B68A6;
-    padding-bottom: 8px;
+    padding-bottom: 6px;
 }
 
 .control-group {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .control-group label {
@@ -255,7 +255,7 @@ select:hover {
 }
 
 .slider-group {
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .slider-group label {
@@ -301,7 +301,7 @@ input[type="range"]::-moz-range-thumb {
 .button-group {
     display: flex;
     gap: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .btn {
@@ -357,16 +357,16 @@ input[type="range"]::-moz-range-thumb {
 /* CSV Upload Controls */
 .csv-upload-group {
     border-top: 2px solid #ecf0f1;
-    padding-top: 15px;
-    margin-top: 15px;
+    padding-top: 10px;
+    margin-top: 10px;
 }
 
 .status-message {
-    margin-top: 10px;
-    padding: 10px;
-    border-radius: 5px;
-    font-size: 13px;
-    line-height: 1.4;
+    margin-top: 6px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.3;
 }
 
 .status-info {
@@ -388,24 +388,24 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .upload-notice {
-    margin-top: 10px;
-    padding: 8px;
+    margin-top: 6px;
+    padding: 6px 8px;
     background: #fff3cd;
     border: 1px solid #ffeaa7;
-    border-radius: 5px;
-    font-size: 12px;
+    border-radius: 4px;
+    font-size: 11px;
     color: #856404;
-    line-height: 1.4;
+    line-height: 1.3;
 }
 
 /* Upload Progress Bar */
 #upload-progress-container {
-    margin-top: 10px;
+    margin-top: 6px;
     position: relative;
     width: 100%;
-    height: 25px;
+    height: 20px;
     background: #ecf0f1;
-    border-radius: 5px;
+    border-radius: 4px;
     overflow: hidden;
     border: 1px solid #bdc3c7;
 }
