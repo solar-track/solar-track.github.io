@@ -147,17 +147,20 @@ export class PowerChart {
     }
     
     updateData(realPower, simulatedPower, samplingRate = 100, fadeRealData = false, isCustomMode = false) {
-        const timePoints = realPower.map((_, i) => i / samplingRate);
+        // Use simulated power for time points if real power is not available
+        const numPoints = simulatedPower ? simulatedPower.length : 0;
+        const timePoints = Array.from({ length: numPoints }, (_, i) => i / samplingRate);
         
         // Convert to microWatts
-        const realPowerMicroW = realPower.map(p => p * 1e6);
-        const simPowerMicroW = simulatedPower.map(p => p * 1e6);
+        const simPowerMicroW = simulatedPower ? simulatedPower.map(p => p * 1e6) : [];
+        const realPowerMicroW = realPower ? realPower.map(p => p * 1e6) : [];
         
         console.log('Chart update:', {
+            hasRealPower: realPower !== null,
             isCustomMode,
-            realPowerRange: [Math.min(...realPowerMicroW), Math.max(...realPowerMicroW)],
-            simPowerRange: [Math.min(...simPowerMicroW), Math.max(...simPowerMicroW)],
-            numPoints: realPowerMicroW.length
+            realPowerRange: realPowerMicroW.length > 0 ? [Math.min(...realPowerMicroW), Math.max(...realPowerMicroW)] : null,
+            simPowerRange: simPowerMicroW.length > 0 ? [Math.min(...simPowerMicroW), Math.max(...simPowerMicroW)] : null,
+            numPoints: numPoints
         });
         
         // Update chart data
@@ -165,10 +168,14 @@ export class PowerChart {
         this.chart.data.datasets[0].data = realPowerMicroW;
         this.chart.data.datasets[1].data = simPowerMicroW;
         
-        // Hide real data in custom mode or fade if requested
-        if (isCustomMode) {
+        // Hide real data if not available, in custom mode, or uploaded file
+        if (isCustomMode || !realPower) {
             this.chart.data.datasets[0].hidden = true;
-            this.chart.data.datasets[1].label = 'Simulated (Custom)';
+            if (isCustomMode) {
+                this.chart.data.datasets[1].label = 'Simulated (Custom)';
+            } else {
+                this.chart.data.datasets[1].label = 'Simulated (Uploaded)';
+            }
         } else {
             this.chart.data.datasets[0].hidden = false;
             this.chart.data.datasets[1].label = 'Simulated';
