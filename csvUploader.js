@@ -55,25 +55,38 @@ export class CSVUploader {
         // Simulate progress during file read
         this.updateProgress(10, 'Reading file...');
 
+        // Simulate progress updates
+        const progressInterval = setInterval(() => {
+            const currentWidth = parseFloat(this.progressBar.style.width) || 0;
+            if (currentWidth < 70) {
+                this.updateProgress(currentWidth + 10, 'Parsing data...');
+            }
+        }, 200);
+
         // Parse CSV
         Papa.parse(file, {
             header: true,
             dynamicTyping: true,
             skipEmptyLines: true,
-            step: (results, parser) => {
-                // Update progress during parsing (estimate based on rows)
-                const progress = Math.min(30 + (parser.streamer._input.length / file.size) * 40, 70);
-                this.updateProgress(progress, 'Parsing data...');
-            },
             complete: (results) => {
+                clearInterval(progressInterval);
                 this.updateProgress(80, 'Processing data...');
+                
+                console.log('PapaParse results:', {
+                    data: results.data,
+                    errors: results.errors,
+                    meta: results.meta
+                });
+                
                 setTimeout(() => {
                     this.processCSV(results.data, file.name);
                 }, 100);
             },
             error: (error) => {
+                clearInterval(progressInterval);
                 this.hideProgress();
                 this.showStatus(`❌ Error parsing CSV: ${error.message}`, 'error');
+                console.error('PapaParse error:', error);
             }
         });
 
@@ -83,6 +96,9 @@ export class CSVUploader {
 
     processCSV(data, filename) {
         console.log('Processing CSV:', filename, 'Rows:', data.length);
+        console.log('First row sample:', data[0]);
+        console.log('Data type:', typeof data, 'Is array:', Array.isArray(data));
+        
         try {
             // Detect CSV format and extract data
             const { positions, normals, realPower, timestamps } = this.extractData(data);
@@ -126,8 +142,10 @@ export class CSVUploader {
             this.app.loadUploadedGesture(gestureData);
 
         } catch (error) {
+            this.hideProgress();
             this.showStatus(`❌ ${error.message}`, 'error');
             console.error('CSV processing error:', error);
+            console.error('Error stack:', error.stack);
         }
     }
 
@@ -137,11 +155,27 @@ export class CSVUploader {
         const realPower = [];
         const timestamps = [];
 
+        // Validate data
+        if (!data || data.length === 0) {
+            throw new Error('CSV file is empty or could not be parsed');
+        }
+
         // Try to detect format
         const firstRow = data[0];
+        
+        if (!firstRow || typeof firstRow !== 'object') {
+            throw new Error('Invalid CSV format - could not read header row');
+        }
+        
         const hasLeapFormat = 'palm_pos_x' in firstRow || 'PalmPositionX' in firstRow;
         const hasRawLeapFormat = 'leap_palm_x' in firstRow; // Raw Leap Motion CSV
         const hasCustomFormat = 'x' in firstRow && 'y' in firstRow && 'z' in firstRow;
+        
+        // Check if any format is recognized
+        if (!hasLeapFormat && !hasRawLeapFormat && !hasCustomFormat) {
+            const columnNames = Object.keys(firstRow).join(', ');
+            throw new Error(`Unrecognized CSV format. Found columns: ${columnNames}. Expected columns like 'leap_palm_x/y/z' or 'x/y/z' or 'palm_pos_x/y/z'.`);
+        }
 
         for (let i = 0; i < data.length; i++) {
             const row = data[i];
