@@ -172,6 +172,9 @@ class SolarTrackDemo {
         // Header buttons (URLs can be updated later)
         this.setupHeaderButtons();
         
+        // Kappa configuration modal
+        this.setupKappaModal();
+        
         // Mobile controls
         this.setupMobileControls();
     }
@@ -940,7 +943,18 @@ class SolarTrackDemo {
         }
         
         // Build CSV content
-        let csvContent = 'timestamp,simulated_power_W,a_mm,H_mm';
+        let csvContent = '';
+        
+        // Add κ metadata if available (for uploaded files with kappa scaling)
+        if (data.kappa !== null && data.kappa !== undefined && data.scaling_method === 'kappa') {
+            csvContent += `# Scaling factor kappa: ${data.kappa.toExponential(6)}\n`;
+            csvContent += `# Kappa source: ${data.kappa_source}\n`;
+            csvContent += `# Scaling method: ${data.scaling_method}\n`;
+            csvContent += `# \n`;
+        }
+        
+        // Add header row
+        csvContent += 'timestamp,simulated_power_W,a_mm,H_mm';
         
         // Add theta column only if orientation-aware model
         if (this.currentModel === 'oriented') {
@@ -1002,6 +1016,188 @@ class SolarTrackDemo {
         document.body.removeChild(link);
         
         console.log(`✓ Exported ${numSamples} samples to ${filename}`);
+    }
+    
+    setupKappaModal() {
+        this.kappaModal = document.getElementById('kappa-modal');
+        this.kappaEditBtn = document.getElementById('kappa-edit-btn');
+        
+        if (!this.kappaModal || !this.kappaEditBtn) {
+            console.warn('Kappa modal elements not found');
+            return;
+        }
+        
+        // Open modal
+        this.kappaEditBtn.addEventListener('click', () => this.openKappaModal());
+        
+        // Close modal
+        document.getElementById('kappa-modal-close').addEventListener('click', () => this.closeKappaModal());
+        document.getElementById('kappa-cancel-btn').addEventListener('click', () => this.closeKappaModal());
+        
+        // Close on background click
+        this.kappaModal.addEventListener('click', (e) => {
+            if (e.target === this.kappaModal) {
+                this.closeKappaModal();
+            }
+        });
+        
+        // Radio button toggle
+        document.querySelectorAll('input[name="kappa-method"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                this.handleKappaMethodChange(e.target.value);
+            });
+        });
+        
+        // Calculate physics button
+        document.getElementById('calculate-physics-btn').addEventListener('click', () => {
+            this.calculatePhysicsKappa();
+        });
+        
+        // Apply button
+        document.getElementById('kappa-apply-btn').addEventListener('click', () => this.applyKappa());
+    }
+    
+    handleKappaMethodChange(method) {
+        const manualGroup = document.getElementById('manual-kappa-group');
+        const physicsGroup = document.getElementById('physics-kappa-group');
+        const calculatedInfo = document.getElementById('calculated-kappa-info');
+        
+        manualGroup.style.display = method === 'manual' ? 'block' : 'none';
+        physicsGroup.style.display = method === 'physics' ? 'block' : 'none';
+        calculatedInfo.style.display = method === 'calculated' ? 'block' : 'none';
+    }
+    
+    openKappaModal() {
+        if (!this.currentGestureData || this.currentGestureData.kappa === null || this.currentGestureData.kappa === undefined) {
+            alert('κ configuration is only available for uploaded motion capture files with real power data.');
+            return;
+        }
+        
+        // Populate modal with current values
+        document.getElementById('modal-current-kappa').textContent = 
+            this.currentGestureData.kappa.toExponential(3);
+        
+        const sourceMap = {
+            'calculated': 'Calculated from real data',
+            'manual': 'Manually entered',
+            'physics': 'Calculated from physical parameters'
+        };
+        document.getElementById('modal-kappa-source').textContent = 
+            sourceMap[this.currentGestureData.kappa_source] || 'Unknown';
+        
+        // Show calculated κ info
+        document.getElementById('calculated-kappa-value').textContent = 
+            this.currentGestureData.kappa.toExponential(3);
+        
+        if (this.currentGestureData.real_power) {
+            const rmse = calculateRMSE(this.currentGestureData.real_power, this.currentGestureData.current_sim) * 1e6;
+            document.getElementById('calculated-rmse-value').textContent = rmse.toFixed(2);
+        }
+        
+        // Reset radio to calculated
+        document.getElementById('kappa-use-calculated').checked = true;
+        this.handleKappaMethodChange('calculated');
+        
+        this.kappaModal.style.display = 'flex';
+    }
+    
+    closeKappaModal() {
+        this.kappaModal.style.display = 'none';
+    }
+    
+    calculatePhysicsKappa() {
+        const efficiency = parseFloat(document.getElementById('physics-efficiency').value) / 100; // Convert % to decimal
+        const area = parseFloat(document.getElementById('physics-area').value) * 1e-4; // Convert cm² to m²
+        const power = parseFloat(document.getElementById('physics-power').value);
+        
+        if (isNaN(efficiency) || isNaN(area) || isNaN(power) || efficiency <= 0 || area <= 0 || power <= 0) {
+            alert('Please enter valid positive numbers for all parameters.');
+            return;
+        }
+        
+        const kappa = calculateKappaFromPhysics(efficiency, area, power);
+        document.getElementById('physics-kappa-result').textContent = kappa.toExponential(3);
+        
+        console.log(`Calculated κ from physics: ${kappa.toExponential(3)}`);
+    }
+    
+    applyKappa() {
+        const method = document.querySelector('input[name="kappa-method"]:checked').value;
+        let newKappa;
+        
+        if (method === 'calculated') {
+            // Keep current calculated kappa
+            newKappa = this.currentGestureData.kappa;
+            this.currentGestureData.kappa_source = 'calculated';
+        } else if (method === 'manual') {
+            const input = document.getElementById('manual-kappa-input').value;
+            newKappa = parseFloat(input);
+            
+            if (isNaN(newKappa) || newKappa <= 0) {
+                alert('Please enter a valid positive number (e.g., 2.45e-4)');
+                return;
+            }
+            
+            this.currentGestureData.kappa = newKappa;
+            this.currentGestureData.kappa_source = 'manual';
+        } else if (method === 'physics') {
+            const resultText = document.getElementById('physics-kappa-result').textContent;
+            if (resultText === '0.0') {
+                alert('Please click "Calculate" first to compute κ from physical parameters.');
+                return;
+            }
+            
+            newKappa = parseFloat(resultText);
+            this.currentGestureData.kappa = newKappa;
+            this.currentGestureData.kappa_source = 'physics';
+        }
+        
+        console.log(`Applying new κ = ${this.currentGestureData.kappa.toExponential(3)} (${this.currentGestureData.kappa_source})`);
+        
+        // Re-apply scaling and update visualization
+        this.reapplyKappaScaling();
+        this.closeKappaModal();
+    }
+    
+    reapplyKappaScaling() {
+        if (!this.currentGestureData || !this.currentGestureData.kappa) return;
+        
+        // Use stored raw view factors
+        const rawViewFactors = this.currentModel === 'oriented' 
+            ? this.currentGestureData.raw_view_factors_oriented
+            : this.currentGestureData.raw_view_factors_parallel;
+        
+        // Apply new kappa
+        const scaledPower = applyKappaScaling(rawViewFactors, this.currentGestureData.kappa);
+        
+        this.currentGestureData.current_sim = scaledPower;
+        
+        // Update both sim arrays
+        if (this.currentModel === 'oriented') {
+            this.currentGestureData.sim_oriented = scaledPower;
+        } else {
+            this.currentGestureData.sim_parallel = scaledPower;
+        }
+        
+        // Update visualization
+        this.scene3d.setTrajectory(
+            this.currentGestureData.positions,
+            this.currentGestureData.normals,
+            scaledPower
+        );
+        
+        this.powerChart.updateData(
+            this.currentGestureData.real_power,
+            scaledPower,
+            this.currentGestureData.sampling_rate,
+            false,
+            false
+        );
+        
+        this.updateMetrics();
+        this.updateStateDisplay(this.currentFrame);
+        
+        console.log('✓ Visualization updated with new κ');
     }
 }
 
