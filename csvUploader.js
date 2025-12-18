@@ -17,12 +17,25 @@ export class CSVUploader {
         this.fileInput = document.getElementById('csv-input');
         this.statusDiv = document.getElementById('upload-status');
 
+        console.log('CSV Uploader UI elements:', {
+            uploadBtn: this.uploadBtn,
+            fileInput: this.fileInput,
+            statusDiv: this.statusDiv
+        });
+
+        if (!this.uploadBtn || !this.fileInput) {
+            console.error('CSV upload UI elements not found!');
+            return;
+        }
+
         // Event listeners
         this.uploadBtn.addEventListener('click', () => {
+            console.log('Upload button clicked');
             this.fileInput.click();
         });
 
         this.fileInput.addEventListener('change', (e) => {
+            console.log('File selected:', e.target.files[0]);
             this.handleFileSelect(e);
         });
     }
@@ -52,9 +65,17 @@ export class CSVUploader {
     }
 
     processCSV(data, filename) {
+        console.log('Processing CSV:', filename, 'Rows:', data.length);
         try {
             // Detect CSV format and extract data
             const { positions, normals, realPower, timestamps } = this.extractData(data);
+
+            console.log('Extracted data:', {
+                positions: positions.length,
+                normals: normals.length,
+                realPower: realPower?.length,
+                timestamps: timestamps.length
+            });
 
             // Validate data
             if (positions.length === 0) {
@@ -78,6 +99,7 @@ export class CSVUploader {
             // Show success
             this.showStatus(`✅ Loaded ${positions.length} samples from ${filename}`, 'success');
 
+            console.log('Calling loadUploadedGesture...');
             // Load into app
             this.app.loadUploadedGesture(gestureData);
 
@@ -96,6 +118,7 @@ export class CSVUploader {
         // Try to detect format
         const firstRow = data[0];
         const hasLeapFormat = 'palm_pos_x' in firstRow || 'PalmPositionX' in firstRow;
+        const hasRawLeapFormat = 'leap_palm_x' in firstRow; // Raw Leap Motion CSV
         const hasCustomFormat = 'x' in firstRow && 'y' in firstRow && 'z' in firstRow;
 
         for (let i = 0; i < data.length; i++) {
@@ -125,7 +148,24 @@ export class CSVUploader {
                 power = row.Power || row.power || null;
                 time = row.Timestamp || row.timestamp || i * 0.033;
 
-            // Format 3: Simple format (x, y, z, nx, ny, nz, [power], [time])
+            // Format 3: Raw Leap Motion CSV (leap_palm_x, leap_palm_y, ...)
+            } else if ('leap_palm_x' in row) {
+                pos = [row.leap_palm_x, row.leap_palm_y, row.leap_palm_z];
+                normal = [
+                    row.leap_palm_normal_x || 0,
+                    row.leap_palm_normal_y || -1,
+                    row.leap_palm_normal_z || 0
+                ];
+                // Calculate power from voltage and current (P = V * I)
+                if (row.v_dc !== null && row.v_dc !== undefined && 
+                    row.i_dc !== null && row.i_dc !== undefined) {
+                    power = row.v_dc * row.i_dc;
+                } else {
+                    power = null;
+                }
+                time = row.time || i * 0.01; // 100 Hz default
+
+            // Format 4: Simple format (x, y, z, nx, ny, nz, [power], [time])
             } else if ('x' in row && 'y' in row && 'z' in row) {
                 pos = [row.x, row.y, row.z];
                 normal = [
@@ -191,16 +231,21 @@ export class CSVUploader {
 /**
  * CSV Format Examples:
  * 
- * Format 1 (Leap Motion):
+ * Format 1 (Leap Motion processed):
  * timestamp,palm_pos_x,palm_pos_y,palm_pos_z,palm_normal_x,palm_normal_y,palm_normal_z,power
  * 0.0,-45.2,654.3,120.1,0.15,0.92,-0.36,0.000234
  * 0.033,-44.8,655.1,121.3,0.14,0.93,-0.35,0.000241
  * 
- * Format 2 (Simple):
+ * Format 2 (Raw Leap Motion CSV):
+ * time,leap_palm_x,leap_palm_y,leap_palm_z,leap_palm_normal_x,leap_palm_normal_y,leap_palm_normal_z,v_dc,i_dc
+ * 18.02,25.5,215.82,65.49,-0.3,-0.95,0.05,0.557197265625,5.223655700683594e-05
+ * 18.03,25.56,215.74,65.47,-0.3,-0.95,0.05,0.52732421875,4.8574447631835935e-05
+ * 
+ * Format 3 (Simple):
  * x,y,z,nx,ny,nz,power,time
  * -45.2,654.3,120.1,0.15,0.92,-0.36,0.000234,0.0
  * -44.8,655.1,121.3,0.14,0.93,-0.35,0.000241,0.033
  * 
- * Note: power and time columns are optional
+ * Note: power and time columns are optional (power calculated from v_dc * i_dc if available)
  */
 
