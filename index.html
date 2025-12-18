@@ -64,9 +64,13 @@
                     <div class="control-group csv-upload-group">
                         <label>Upload Motion Data:</label>
                         <button id="upload-csv-btn" class="btn btn-upload">
-                            <i class="fas fa-file-csv"></i> Upload CSV
+                            <i class="fas fa-file-csv"></i> Upload Motion Capture
                         </button>
                         <input type="file" id="csv-input" accept=".csv" style="display: none;">
+                        <div id="upload-progress-container" class="progress-container" style="display: none;">
+                            <div id="upload-progress-bar" class="upload-progress-bar"></div>
+                            <span id="upload-progress-text" class="upload-progress-text">0%</span>
+                        </div>
                         <div id="upload-status" class="status-message" style="display: none;"></div>
                         <div class="upload-notice">
                             ℹ️ Your CSV file is processed entirely in your browser. No data is uploaded to our servers.
@@ -259,10 +263,15 @@
                 <!-- Power Chart -->
                 <div class="chart-container">
                     <canvas id="power-chart"></canvas>
-                    <div class="metrics">
-                        <span id="metric-rmse">RMSE: 0.0 μW</span>
-                        <span id="metric-r2">R²: 0.000</span>
-                        <span id="metric-corr">ρ: 0.000</span>
+                    <div class="chart-footer">
+                        <div class="metrics">
+                            <span id="metric-rmse">RMSE: 0.0 μW</span>
+                            <span id="metric-r2">R²: 0.000</span>
+                            <span id="metric-corr">ρ: 0.000</span>
+                        </div>
+                        <button id="export-csv-btn" class="btn-export" title="Export Power Trace as CSV">
+                            <i class="fas fa-download"></i> Export CSV
+                        </button>
                     </div>
                 </div>
             </div>

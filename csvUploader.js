@@ -16,11 +16,15 @@ export class CSVUploader {
         this.uploadBtn = document.getElementById('upload-csv-btn');
         this.fileInput = document.getElementById('csv-input');
         this.statusDiv = document.getElementById('upload-status');
+        this.progressContainer = document.getElementById('upload-progress-container');
+        this.progressBar = document.getElementById('upload-progress-bar');
+        this.progressText = document.getElementById('upload-progress-text');
 
         console.log('CSV Uploader UI elements:', {
             uploadBtn: this.uploadBtn,
             fileInput: this.fileInput,
-            statusDiv: this.statusDiv
+            statusDiv: this.statusDiv,
+            progressContainer: this.progressContainer
         });
 
         if (!this.uploadBtn || !this.fileInput) {
@@ -44,18 +48,31 @@ export class CSVUploader {
         const file = event.target.files[0];
         if (!file) return;
 
-        // Show loading status
-        this.showStatus('📂 Loading CSV...', 'info');
+        // Show progress bar
+        this.showProgress(0);
+        this.hideStatus();
+
+        // Simulate progress during file read
+        this.updateProgress(10, 'Reading file...');
 
         // Parse CSV
         Papa.parse(file, {
             header: true,
             dynamicTyping: true,
             skipEmptyLines: true,
+            step: (results, parser) => {
+                // Update progress during parsing (estimate based on rows)
+                const progress = Math.min(30 + (parser.streamer._input.length / file.size) * 40, 70);
+                this.updateProgress(progress, 'Parsing data...');
+            },
             complete: (results) => {
-                this.processCSV(results.data, file.name);
+                this.updateProgress(80, 'Processing data...');
+                setTimeout(() => {
+                    this.processCSV(results.data, file.name);
+                }, 100);
             },
             error: (error) => {
+                this.hideProgress();
                 this.showStatus(`❌ Error parsing CSV: ${error.message}`, 'error');
             }
         });
@@ -91,13 +108,18 @@ export class CSVUploader {
                 name: `Uploaded: ${filename}`,
                 positions: positions,
                 normals: normals,
-                real_power: realPower, // May be null if not in CSV
+                real_power: realPower, // Keep for internal use but don't show in chart
                 timestamps: timestamps,
                 isUploaded: true
             };
 
-            // Show success
-            this.showStatus(`✅ Loaded ${positions.length} samples from ${filename}`, 'success');
+            // Complete progress
+            this.updateProgress(100, 'Complete!');
+            
+            setTimeout(() => {
+                this.hideProgress();
+                this.showStatus(`✅ Loaded ${positions.length} samples from ${filename}`, 'success');
+            }, 500);
 
             console.log('Calling loadUploadedGesture...');
             // Load into app
@@ -224,6 +246,34 @@ export class CSVUploader {
             setTimeout(() => {
                 this.statusDiv.style.display = 'none';
             }, 5000);
+        }
+    }
+
+    hideStatus() {
+        if (this.statusDiv) {
+            this.statusDiv.style.display = 'none';
+        }
+    }
+
+    showProgress(percent) {
+        if (this.progressContainer) {
+            this.progressContainer.style.display = 'block';
+        }
+        this.updateProgress(percent, 'Starting...');
+    }
+
+    updateProgress(percent, message = '') {
+        if (this.progressBar) {
+            this.progressBar.style.width = `${percent}%`;
+        }
+        if (this.progressText) {
+            this.progressText.textContent = message || `${Math.round(percent)}%`;
+        }
+    }
+
+    hideProgress() {
+        if (this.progressContainer) {
+            this.progressContainer.style.display = 'none';
         }
     }
 }

@@ -107,7 +107,8 @@ class SolarTrackDemo {
             statePower: document.getElementById('state-power'),
             metricRmse: document.getElementById('metric-rmse'),
             metricR2: document.getElementById('metric-r2'),
-            metricCorr: document.getElementById('metric-corr')
+            metricCorr: document.getElementById('metric-corr'),
+            exportCsvBtn: document.getElementById('export-csv-btn')
         };
     }
     
@@ -158,6 +159,9 @@ class SolarTrackDemo {
             this.animationSpeed = parseFloat(e.target.value);
             this.elements.speedValue.textContent = this.animationSpeed.toFixed(1);
         });
+        
+        // Export CSV button
+        this.elements.exportCsvBtn.addEventListener('click', () => this.exportPowerTraceCSV());
         
         // Info icon tooltips
         this.setupTooltips();
@@ -661,16 +665,16 @@ class SolarTrackDemo {
             this.currentGestureData.current_sim
         );
         
-        // Update chart
+        // Update chart - Don't show real power for uploaded files
         this.powerChart.updateData(
-            this.currentGestureData.real_power,
+            null, // Don't show real power curve for uploaded files
             this.currentGestureData.current_sim,
             this.currentGestureData.sampling_rate,
-            this.lightPositionModified && this.currentGestureData.real_power !== null,
+            false, // No fade since no real power shown
             false // Not custom
         );
         
-        // Update metrics
+        // Update metrics (will be hidden since no real power shown)
         this.updateMetrics();
         
         // Reset animation
@@ -879,6 +883,93 @@ class SolarTrackDemo {
         
         // Update state display
         this.updateStateDisplay(index);
+    }
+    
+    exportPowerTraceCSV() {
+        if (!this.currentGestureData) {
+            alert('No data to export. Please load a gesture or upload motion capture data first.');
+            return;
+        }
+        
+        console.log('Exporting power trace CSV...');
+        
+        const data = this.currentGestureData;
+        const numSamples = data.num_samples;
+        
+        // Generate timestamps
+        let timestamps;
+        if (data.timestamps && data.timestamps.length === numSamples) {
+            // Use original timestamps from uploaded file or JSON
+            timestamps = data.timestamps;
+        } else {
+            // Generate timestamps based on sampling rate
+            const dt = 1.0 / data.sampling_rate;
+            timestamps = Array.from({ length: numSamples }, (_, i) => i * dt);
+        }
+        
+        // Build CSV content
+        let csvContent = 'timestamp,simulated_power_W,a_mm,H_mm';
+        
+        // Add theta column only if orientation-aware model
+        if (this.currentModel === 'oriented') {
+            csvContent += ',theta_deg';
+        }
+        
+        csvContent += '\n';
+        
+        // Add data rows
+        for (let i = 0; i < numSamples; i++) {
+            const time = timestamps[i];
+            const power = data.current_sim[i];
+            const a = data.current_a ? data.current_a[i] : 0;
+            const H = data.current_H ? data.current_H[i] : 0;
+            
+            csvContent += `${time.toFixed(6)},${power.toExponential(6)},${a.toFixed(2)},${H.toFixed(2)}`;
+            
+            // Add theta if orientation-aware
+            if (this.currentModel === 'oriented') {
+                const pos = data.positions[i];
+                const normal = data.normals[i];
+                const cellNormal = [-normal[0], -normal[1], -normal[2]];
+                const vecToLight = [
+                    this.lightPosition[0] - pos[0],
+                    this.lightPosition[1] - pos[1],
+                    this.lightPosition[2] - pos[2]
+                ];
+                
+                const dot = cellNormal[0] * vecToLight[0] + 
+                           cellNormal[1] * vecToLight[1] + 
+                           cellNormal[2] * vecToLight[2];
+                const magNormal = Math.sqrt(cellNormal[0]**2 + cellNormal[1]**2 + cellNormal[2]**2);
+                const magVec = Math.sqrt(vecToLight[0]**2 + vecToLight[1]**2 + vecToLight[2]**2);
+                
+                const cosTheta = dot / (magNormal * magVec);
+                const theta = Math.acos(Math.max(-1, Math.min(1, cosTheta))) * (180 / Math.PI);
+                
+                csvContent += `,${theta.toFixed(2)}`;
+            }
+            
+            csvContent += '\n';
+        }
+        
+        // Create filename
+        const gestureName = data.name.replace(/[^a-z0-9]/gi, '_');
+        const modelName = this.currentModel === 'oriented' ? 'oriented' : 'parallel';
+        const filename = `power_trace_${gestureName}_${modelName}.csv`;
+        
+        // Download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        console.log(`✓ Exported ${numSamples} samples to ${filename}`);
     }
 }
 
