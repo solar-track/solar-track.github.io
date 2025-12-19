@@ -200,13 +200,21 @@
             color: #2563eb;
             cursor: pointer;
             position: relative;
-            font-size: 0.9em;
+            font-size: 0.75em;
+            font-weight: 600;
             vertical-align: super;
             text-decoration: none;
+            margin: 0 2px;
         }
         
         .citation:hover {
             text-decoration: underline;
+        }
+        
+        .ref-link {
+            font-size: 0.9em;
+            color: #2563eb !important;
+            font-weight: 400;
         }
         
         /* References section */
@@ -222,24 +230,53 @@
         }
         
         .reference {
-            margin-bottom: 20px;
-            padding-left: 30px;
-            text-indent: -30px;
-            font-size: 16px;
+            margin-bottom: 18px;
+            padding-left: 0;
+            font-size: 15px;
             line-height: 1.6;
+            color: #666;
         }
         
         .ref-number {
-            font-weight: 600;
-            color: #2563eb;
-        }
-        
-        .ref-authors {
-            font-weight: 600;
+            font-weight: 400;
+            color: #666;
+            margin-right: 8px;
         }
         
         .ref-title {
+            font-weight: 600;
+            color: #000;
+            margin-right: 4px;
+        }
+        
+        .ref-title a {
+            color: #2563eb;
+            text-decoration: none;
+            margin-left: 4px;
+        }
+        
+        .ref-title a:hover {
+            text-decoration: underline;
+        }
+        
+        .ref-authors {
+            font-weight: 400;
+            color: #666;
+        }
+        
+        .ref-venue {
             font-style: italic;
+            color: #666;
+        }
+        
+        .ref-doi {
+            color: #2563eb;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .ref-doi:hover {
+            text-decoration: underline;
         }
         
         /* Code */
@@ -370,7 +407,7 @@
         <section>
             <h2>Introduction</h2>
             <p>
-                Wearable solar cells offer a unique opportunity for continuous sensing by harvesting ambient energy while simultaneously providing information about device motion and orientation. Traditional motion tracking relies on inertial measurement units (IMUs) or cameras, which consume significant power. In contrast, solar-based tracking leverages the energy harvesting process itself, making it an attractive solution for battery-constrained wearable devices<a href="#ref-1" class="citation">[1]</a>.
+                Wearable solar cells offer a unique opportunity for continuous sensing by harvesting ambient energy while simultaneously providing information about device motion and orientation. Traditional motion tracking relies on inertial measurement units (IMUs) or cameras, which consume significant power. In contrast, solar-based tracking leverages the energy harvesting process itself, making it an attractive solution for battery-constrained wearable devices<a href="#ref-1" class="citation">1</a>.
             </p>
             <p>
                 Our radiometric model captures the relationship between hand motion and harvested power under controlled lighting conditions. By modeling the geometric configuration of the solar cell relative to the light source, we can infer continuous hand position and orientation. This approach enables applications ranging from gesture-based interfaces to activity monitoring without additional sensing hardware.
@@ -429,7 +466,7 @@
             </div>
             
             <p>
-                where \(\theta\) is the incidence angle between the cell normal and the light direction vector. This extension enables continuous orientation tracking in addition to position<a href="#ref-2" class="citation">[2]</a>.
+                where \(\theta\) is the incidence angle between the cell normal and the light direction vector. This extension enables continuous orientation tracking in addition to position<a href="#ref-2" class="citation">2</a>.
             </p>
         </section>
         
@@ -465,7 +502,7 @@
             </figure>
             
             <p>
-                The level sets in Figure 2 reveal the structure of the power function. Points along a single curve produce the same harvested power, representing the ambiguity inherent in single-source tracking. By observing temporal sequences of power measurements, we can disambiguate position along these curves and perform continuous tracking<a href="#ref-3" class="citation">[3]</a>.
+                The level sets in Figure 2 reveal the structure of the power function. Points along a single curve produce the same harvested power, representing the ambiguity inherent in single-source tracking. By observing temporal sequences of power measurements, we can disambiguate position along these curves and perform continuous tracking<a href="#ref-3" class="citation">3</a>.
             </p>
         </section>
         
@@ -521,24 +558,27 @@
             <h2>References</h2>
             
             <div class="reference" id="ref-1">
-                <span class="ref-number">[1]</span>
-                <span class="ref-authors">Author A., Author B., and Author C.</span>
-                <span class="ref-title">"Energy Harvesting for Wearable Devices: A Survey"</span>, 
-                IEEE Transactions on Mobile Computing, 2023.
+                <span class="ref-number">1.</span>
+                <span class="ref-title">Energy Harvesting for Wearable Devices: A Survey<a href="#" class="ref-link">[link]</a></span><br>
+                <span class="ref-authors">Author A., Author B., and Author C., 2023.</span> 
+                <span class="ref-venue">IEEE Transactions on Mobile Computing, Vol 18(3), pp. 245--267.</span> 
+                <a href="#" class="ref-doi">DOI: 10.1109/TMC.2023.12345</a>
             </div>
             
             <div class="reference" id="ref-2">
-                <span class="ref-number">[2]</span>
-                <span class="ref-authors">Author D. and Author E.</span>
-                <span class="ref-title">"Orientation-Aware Solar Tracking"</span>, 
-                Proceedings of UbiComp, 2024.
+                <span class="ref-number">2.</span>
+                <span class="ref-title">Orientation-Aware Solar Tracking<a href="#" class="ref-link">[PDF]</a></span><br>
+                <span class="ref-authors">Author D. and Author E., 2024.</span> 
+                <span class="ref-venue">Proceedings of the 2024 ACM International Joint Conference on Pervasive and Ubiquitous Computing, pp. 123--134.</span> 
+                <a href="#" class="ref-doi">DOI: 10.1145/3678543.12345</a>
             </div>
             
             <div class="reference" id="ref-3">
-                <span class="ref-number">[3]</span>
-                <span class="ref-authors">Author F., Author G., and Author H.</span>
-                <span class="ref-title">"Gesture Recognition Using Ambient Light Sensors"</span>, 
-                ACM Transactions on Sensor Networks, 2022.
+                <span class="ref-number">3.</span>
+                <span class="ref-title">Gesture Recognition Using Ambient Light Sensors<a href="#" class="ref-link">[link]</a></span><br>
+                <span class="ref-authors">Author F., Author G., and Author H., 2022.</span> 
+                <span class="ref-venue">ACM Transactions on Sensor Networks, Vol 15(2), pp. 78--99.</span> 
+                <a href="#" class="ref-doi">DOI: 10.1145/3456789.12345</a>
             </div>
         </section>
         
