@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SolarTrack: An Efficient Radiometric Model for Wearable Solar Harvesting</title>
+    
+    <!-- MathJax for LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        /* Distill.pub inspired styles */
+        
+        /* Typography - ET Book style serif */
+        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+Pro:wght@400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Lora', Georgia, serif;
+            font-size: 18px;
+            line-height: 1.7;
+            color: #111;
+            background: #fff;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Layout - Distill.pub style */
+        .distill-article {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+        
+        /* Header */
+        .article-header {
+            margin-bottom: 60px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 40px;
+        }
+        
+        .article-title {
+            font-family: 'Source Sans Pro', Arial, sans-serif;
+            font-size: 42px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            color: #000;
+        }
+        
+        .article-meta {
+            font-family: 'Source Sans Pro', Arial, sans-serif;
+            font-size: 14px;
+            color: #666;
+            margin-top: 20px;
+        }
+        
+        .authors {
+            margin-bottom: 10px;
+        }
+        
+        .author {
+            display: inline-block;
+            margin-right: 20px;
+        }
+        
+        .author-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .author-affiliation {
+            font-size: 13px;
+            color: #888;
+        }
+        
+        .published-date {
+            color: #888;
+            font-size: 13px;
+        }
+        
+        /* Back link */
+        .back-link {
+            font-family: 'Source Sans Pro', Arial, sans-serif;
+            font-size: 14px;
+            margin-bottom: 30px;
+            padding: 10px 0;
+        }
+        
+        .back-link a {
+            color: #2563eb;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Source Sans Pro', Arial, sans-serif;
+            font-weight: 700;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            color: #000;
+        }
+        
+        h2 {
+            font-size: 28px;
+            margin-top: 50px;
+            padding-top: 10px;
+        }
+        
+        h3 {
+            font-size: 22px;
+            margin-top: 35px;
+        }
+        
+        p {
+            margin-bottom: 20px;
+        }
+        
+        /* Links */
+        a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Math */
+        .math-block {
+            margin: 30px 0;
+            overflow-x: auto;
+            padding: 20px 0;
+        }
+        
+        mjx-container {
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+        
+        /* Figures */
+        figure {
+            margin: 40px 0;
+            text-align: center;
+        }
+        
+        figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        figcaption {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #666;
+            margin-top: 15px;
+            text-align: left;
+            font-family: 'Source Sans Pro', Arial, sans-serif;
+        }
+        
+        .fig-number {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        /* Equations */
+        .equation-block {
+            background: #f8f9fa;
+            border-left: 3px solid #2563eb;
+            padding: 20px 25px;
+            margin: 30px 0;
+            border-radius: 4px;
+        }
+        
+        .equation-label {
+            font-family: 'Source Sans Pro', Arial, sans-serif;
+            font-size: 14px;
+            color: #666;
+            text-align: right;
+            margin-top: 10px;
+        }
+        
+        /* Citations */
+        .citation {
+            color: #2563eb;
+            cursor: pointer;
+            position: relative;
+            font-size: 0.9em;
+            vertical-align: super;
+            text-decoration: none;
+        }
+        
+        .citation:hover {
+            text-decoration: underline;
+        }
+        
+        /* References section */
+        .references {
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .references h2 {
+            font-size: 24px;
+            margin-bottom: 25px;
+        }
+        
+        .reference {
+            margin-bottom: 20px;
+            padding-left: 30px;
+            text-indent: -30px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .ref-number {
+            font-weight: 600;
+            color: #2563eb;
+        }
+        
+        .ref-authors {
+            font-weight: 600;
+        }
+        
+        .ref-title {
+            font-style: italic;
+        }
+        
+        /* Code */
+        code {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #d14;
+        }
+        
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            font-family: 'Source Sans Pro', Arial, sans-serif;
+            font-size: 16px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        th {
+            font-weight: 600;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        /* Interactive demo link */
+        .demo-link {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            display: inline-block;
+            margin: 30px 0;
+            font-family: 'Source Sans Pro', Arial, sans-serif;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .demo-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+            text-decoration: none;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                font-size: 16px;
+            }
+            
+            .distill-article {
+                padding: 30px 15px;
+            }
+            
+            .article-title {
+                font-size: 32px;
+            }
+            
+            h2 {
+                font-size: 24px;
+            }
+            
+            h3 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <article class="distill-article">
+        <!-- Back link -->
+        <div class="back-link">
+            <a href="./index.html">← Back to Interactive Demo</a>
+        </div>
+        
+        <!-- Header -->
+        <header class="article-header">
+            <h1 class="article-title">SolarTrack: An Efficient Radiometric Model for Wearable Solar Harvesting</h1>
+            
+            <div class="article-meta">
+                <div class="authors">
+                    <div class="author">
+                        <span class="author-name">Yasien Ghalwash</span>
+                        <span class="author-affiliation">Queensland University of Technology</span>
+                    </div>
+                    <div class="author">
+                        <span class="author-name">Abdelwahed Khamis</span>
+                        <span class="author-affiliation">CSIRO</span>
+                    </div>
+                    <div class="author">
+                        <span class="author-name">Moid Sandhu</span>
+                        <span class="author-affiliation">CSIRO</span>
+                    </div>
+                    <div class="author">
+                        <span class="author-name">Sara Khalifa</span>
+                        <span class="author-affiliation">Queensland University of Technology</span>
+                    </div>
+                    <div class="author">
+                        <span class="author-name">Raja Jurdak</span>
+                        <span class="author-affiliation">Queensland University of Technology & CSIRO</span>
+                    </div>
+                </div>
+                <div class="published-date">Published: December 2025</div>
+            </div>
+        </header>
+        
+        <!-- Interactive Demo Link -->
+        <a href="./index.html" class="demo-link">🚀 Try the Interactive Demo</a>
+        
+        <!-- Abstract -->
+        <section>
+            <p>
+                <strong>Abstract.</strong> This article presents an efficient radiometric model for continuous tracking of hand motion using wearable solar cells. Our approach leverages the geometric relationship between hand position and a light source to enable power-based tracking without occlusion. The model provides a foundation for gesture recognition, activity monitoring, and other motion-sensing applications in wearable devices.
+            </p>
+        </section>
+        
+        <!-- Introduction -->
+        <section>
+            <h2>Introduction</h2>
+            <p>
+                Wearable solar cells offer a unique opportunity for continuous sensing by harvesting ambient energy while simultaneously providing information about device motion and orientation. Traditional motion tracking relies on inertial measurement units (IMUs) or cameras, which consume significant power. In contrast, solar-based tracking leverages the energy harvesting process itself, making it an attractive solution for battery-constrained wearable devices<a href="#ref-1" class="citation">[1]</a>.
+            </p>
+            <p>
+                Our radiometric model captures the relationship between hand motion and harvested power under controlled lighting conditions. By modeling the geometric configuration of the solar cell relative to the light source, we can infer continuous hand position and orientation. This approach enables applications ranging from gesture-based interfaces to activity monitoring without additional sensing hardware.
+            </p>
+        </section>
+        
+        <!-- Model Formulation -->
+        <section>
+            <h2>Model Formulation</h2>
+            <p>
+                The harvested power \(P\) from a wearable solar cell can be modeled as a function of geometric parameters and cell properties:
+            </p>
+            
+            <div class="equation-block">
+                <div class="math-block">
+                    \[P = \kappa \cdot \mathcal{F}(a, H) + \epsilon\]
+                </div>
+                <div class="equation-label">(1)</div>
+            </div>
+            
+            <p>where:</p>
+            <ul style="margin-left: 40px; margin-bottom: 20px;">
+                <li>\(\kappa\) is a scaling factor capturing cell efficiency, area, and light intensity</li>
+                <li>\(\mathcal{F}(a, H)\) is the view factor between the cell and light source</li>
+                <li>\(a\) is the lateral offset (horizontal distance) in millimeters</li>
+                <li>\(H\) is the vertical separation (height) in millimeters</li>
+                <li>\(\epsilon\) represents measurement noise</li>
+            </ul>
+            
+            <h3>View Factor Computation</h3>
+            <p>
+                The view factor \(\mathcal{F}(a, H)\) quantifies the fraction of radiation leaving the light source that reaches the solar cell. For a circular disk (solar cell) and a circular light source, we compute this using numerical integration:
+            </p>
+            
+            <div class="equation-block">
+                <div class="math-block">
+                    \[\mathcal{F}(a, H) = \frac{1}{\pi r^2} \int_0^{2\pi} \int_0^r \frac{\cos\theta_1 \cos\theta_2}{\pi L^2} \, r' \, dr' \, d\phi\]
+                </div>
+                <div class="equation-label">(2)</div>
+            </div>
+            
+            <p>
+                where \(r\) is the cell radius, \(\theta_1\) and \(\theta_2\) are the angles between surface normals and the line connecting the surfaces, and \(L\) is the distance between differential surface elements.
+            </p>
+            
+            <h3>Orientation-Aware Extension</h3>
+            <p>
+                For applications requiring orientation tracking, we extend the model to account for cell tilt using Lambert's cosine law:
+            </p>
+            
+            <div class="equation-block">
+                <div class="math-block">
+                    \[\mathcal{F}_{\text{oriented}}(a, H, \theta) = \mathcal{F}(a, H) \cdot \max(0, \cos\theta)\]
+                </div>
+                <div class="equation-label">(3)</div>
+            </div>
+            
+            <p>
+                where \(\theta\) is the incidence angle between the cell normal and the light direction vector. This extension enables continuous orientation tracking in addition to position<a href="#ref-2" class="citation">[2]</a>.
+            </p>
+        </section>
+        
+        <!-- Visualization -->
+        <section>
+            <h2>Geometric Interpretation</h2>
+            
+            <figure>
+                <div style="background: #f8f9fa; padding: 40px; border-radius: 8px; min-height: 300px; display: flex; align-items: center; justify-content: center; color: #999;">
+                    [Figure 1: Geometric configuration showing hand position (a, H), light source, and view factor visualization]
+                </div>
+                <figcaption>
+                    <span class="fig-number">Figure 1.</span> Geometric configuration of the radiometric model. The lateral offset <em>a</em> and height <em>H</em> define the position of the solar cell relative to the light source. The view factor \(\mathcal{F}(a, H)\) captures the fraction of light reaching the cell.
+                </figcaption>
+            </figure>
+            
+            <p>
+                Figure 1 illustrates the key geometric parameters of our model. As the hand moves through 3D space, the changing values of \(a\) and \(H\) create a unique power signature that can be used for tracking. The relationship is smooth and deterministic under the assumption of no occlusion, making it suitable for continuous motion inference.
+            </p>
+        </section>
+        
+        <!-- Level Sets -->
+        <section>
+            <h2>Power Level Sets</h2>
+            
+            <figure>
+                <div style="background: #f8f9fa; padding: 40px; border-radius: 8px; min-height: 300px; display: flex; align-items: center; justify-content: center; color: #999;">
+                    [Figure 2: Power level sets in (a, H) space showing iso-power curves]
+                </div>
+                <figcaption>
+                    <span class="fig-number">Figure 2.</span> Level sets of harvested power in the (a, H) parameter space. Each curve represents a constant power value. The spacing between curves indicates the sensitivity of power to position changes.
+                </figcaption>
+            </figure>
+            
+            <p>
+                The level sets in Figure 2 reveal the structure of the power function. Points along a single curve produce the same harvested power, representing the ambiguity inherent in single-source tracking. By observing temporal sequences of power measurements, we can disambiguate position along these curves and perform continuous tracking<a href="#ref-3" class="citation">[3]</a>.
+            </p>
+        </section>
+        
+        <!-- Applications -->
+        <section>
+            <h2>Applications</h2>
+            
+            <h3>Continuous Hand Tracking</h3>
+            <p>
+                The primary application of our model is continuous hand tracking for wearable devices. By mounting a solar cell on the wrist or hand, we can track 3D motion trajectories without additional sensors. This enables always-on tracking with zero power overhead, as the tracking information is obtained during the energy harvesting process.
+            </p>
+            
+            <h3>Gesture Recognition</h3>
+            <p>
+                Temporal sequences of power measurements contain rich information about hand gestures. Our model provides the foundation for recognizing gestures such as circles, swipes, and other patterns. Combined with machine learning classifiers, this approach can enable gesture-based interfaces for smartwatches and other wearable devices.
+            </p>
+            
+            <h3>Activity Monitoring</h3>
+            <p>
+                Beyond explicit gestures, our model can be used for continuous activity monitoring. Different activities produce characteristic power patterns that can be used to infer user behavior, providing valuable context for health and fitness applications.
+            </p>
+        </section>
+        
+        <!-- Model Limitations -->
+        <section>
+            <h2>Limitations and Future Work</h2>
+            <p>
+                Our current model assumes no occlusion between the solar cell and light source. In practice, self-occlusion (e.g., from fingers) and environmental occlusion can affect the power signal. Future work will address these challenges through robust estimation techniques and multi-sensor fusion.
+            </p>
+            <p>
+                Additionally, the model currently assumes a single stationary light source. Extending to multiple or moving light sources would broaden the applicability to real-world scenarios with complex lighting conditions.
+            </p>
+        </section>
+        
+        <!-- Conclusion -->
+        <section>
+            <h2>Conclusion</h2>
+            <p>
+                We have presented an efficient radiometric model for continuous hand tracking using wearable solar cells. The model provides a principled approach to inferring 3D position and orientation from harvested power measurements. By leveraging the energy harvesting process itself, our approach enables zero-power motion sensing for battery-constrained wearable devices.
+            </p>
+            <p>
+                The interactive demo accompanying this article allows readers to explore the model's behavior under different conditions and gain intuition about the geometric relationships governing solar-based tracking.
+            </p>
+        </section>
+        
+        <!-- Try the Demo -->
+        <section style="text-align: center; margin: 50px 0;">
+            <a href="./index.html" class="demo-link">🎨 Explore the Interactive Demo</a>
+        </section>
+        
+        <!-- References -->
+        <section class="references">
+            <h2>References</h2>
+            
+            <div class="reference" id="ref-1">
+                <span class="ref-number">[1]</span>
+                <span class="ref-authors">Author A., Author B., and Author C.</span>
+                <span class="ref-title">"Energy Harvesting for Wearable Devices: A Survey"</span>, 
+                IEEE Transactions on Mobile Computing, 2023.
+            </div>
+            
+            <div class="reference" id="ref-2">
+                <span class="ref-number">[2]</span>
+                <span class="ref-authors">Author D. and Author E.</span>
+                <span class="ref-title">"Orientation-Aware Solar Tracking"</span>, 
+                Proceedings of UbiComp, 2024.
+            </div>
+            
+            <div class="reference" id="ref-3">
+                <span class="ref-number">[3]</span>
+                <span class="ref-authors">Author F., Author G., and Author H.</span>
+                <span class="ref-title">"Gesture Recognition Using Ambient Light Sensors"</span>, 
+                ACM Transactions on Sensor Networks, 2022.
+            </div>
+        </section>
+        
+        <!-- Footer -->
+        <footer style="margin-top: 60px; padding-top: 30px; border-top: 1px solid #e0e0e0; font-size: 14px; color: #666;">
+            <p>For questions or feedback, please contact the authors.</p>
+            <p style="margin-top: 10px;">© 2025 The Authors. This work is licensed under a Creative Commons Attribution 4.0 International License.</p>
+        </footer>
+    </article>
+</body>
+</html>
+
