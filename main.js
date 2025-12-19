@@ -542,8 +542,19 @@ class SolarTrackDemo {
             } else {
                 scaledPower = result.power.map(() => 50 * 1e-6);
             }
+        } else if (this.currentGestureData.scaling_method === 'kappa' && this.currentGestureData.kappa) {
+            // For uploaded files with kappa scaling, apply kappa to new view factors
+            scaledPower = applyKappaScaling(result.power, this.currentGestureData.kappa);
+            console.log(`✓ Applied κ = ${this.currentGestureData.kappa.toExponential(3)} to recomputed simulation`);
+            
+            // Update raw view factors for this model
+            if (this.currentModel === 'oriented') {
+                this.currentGestureData.raw_view_factors_oriented = result.power;
+            } else {
+                this.currentGestureData.raw_view_factors_parallel = result.power;
+            }
         } else {
-            // For real gestures, scale to match real power range
+            // For preset gestures or uploaded without kappa, scale to match real power range
             scaledPower = applyPerSegmentScaling(
                 result.power,
                 this.currentGestureData.real_power
@@ -961,13 +972,20 @@ class SolarTrackDemo {
         // Build CSV content
         let csvContent = '';
         
+        // Add metadata header
+        csvContent += `# SolarTrack Power Trace Export\n`;
+        csvContent += `# Gesture: ${data.name}\n`;
+        csvContent += `# Model: ${this.currentModel === 'oriented' ? 'Orientation-aware' : 'Parallel disk'}\n`;
+        csvContent += `# Light position (mm): [${this.lightPosition.map(v => v.toFixed(1)).join(', ')}]\n`;
+        
         // Add κ metadata if available (for uploaded files with kappa scaling)
         if (data.kappa !== null && data.kappa !== undefined && data.scaling_method === 'kappa') {
             csvContent += `# Scaling factor kappa: ${data.kappa.toExponential(6)}\n`;
             csvContent += `# Kappa source: ${data.kappa_source}\n`;
             csvContent += `# Scaling method: ${data.scaling_method}\n`;
-            csvContent += `# \n`;
         }
+        
+        csvContent += `# \n`;
         
         // Add header row
         csvContent += 'timestamp,simulated_power_W,a_mm,H_mm';
