@@ -12,8 +12,8 @@
     <!-- MathJax for LaTeX rendering -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-  <script type="module" crossorigin src="/assets/index-20csd5px.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-Bgxog-_g.css">
+  <script type="module" crossorigin src="/assets/index-ku0LuAlk.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-Dvp6OuLP.css">
 </head>
 <body>
     <div id="app">
@@ -48,7 +48,12 @@
             <!-- Control Panel -->
             <div class="control-panel">
                 <div class="control-section">
-                    <h3>Controls</h3>
+                    <h3>
+                        Controls
+                        <button id="settings-btn" class="settings-icon-btn" title="Advanced Settings">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                    </h3>
                     
                     <div class="control-group">
                         <label for="gesture-select">Trajectory:</label>
@@ -99,34 +104,6 @@
                             <strong>Orientation Aware:</strong> Accounts for hand orientation using Lambert's cosine law. Power depends on the angle between the cell normal and light direction (P ∝ cos θ).
                             <br><br>
                             <strong>Parallel Disk:</strong> Simplified model assuming the palm normal always points upward, ignoring orientation effects.
-                        </div>
-                    </div>
-
-                    <div class="control-group" id="accuracy-control-group">
-                        <label>
-                            Simulation Accuracy:
-                            <span class="info-icon" data-tooltip="accuracy-info">ⓘ</span>
-                        </label>
-                        <div class="radio-group">
-                            <label>
-                                <input type="radio" name="accuracy" value="fast" id="accuracy-fast" checked>
-                                <span>Fast (Approximate)</span>
-                            </label>
-                            <label>
-                                <input type="radio" name="accuracy" value="exact" id="accuracy-exact">
-                                <span>Exact (Eq. A.4)</span>
-                            </label>
-                        </div>
-                        <div class="accuracy-note" id="accuracy-note" style="display: none;">
-                            <i class="fas fa-info-circle"></i>
-                            <span>Exact mode is only available for Orientation Aware model</span>
-                        </div>
-                        
-                        <!-- Tooltip -->
-                        <div id="accuracy-info-tooltip" class="tooltip-content" style="display: none;">
-                            <strong>Fast (Approximate):</strong> Uses a single cosine factor from the cell normal to the lamp center. Very fast (~0.1ms/sample), suitable for real-time animation.
-                            <br><br>
-                            <strong>Exact (Eq. A.4):</strong> Integrates over the entire lamp disk surface, computing proper radiometric kernel for each differential element. More accurate but slower (~5-10ms/sample). Only applies to Orientation Aware model.
                         </div>
                     </div>
 
@@ -384,6 +361,102 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="kappa-cancel-btn">Cancel</button>
                 <button class="btn btn-primary" id="kappa-apply-btn">Apply & Update</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Settings Modal -->
+    <div id="settings-modal" class="modal" style="display: none;">
+        <div class="modal-content settings-modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-cog"></i> Advanced Settings</h3>
+                <button class="modal-close" id="settings-modal-close">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Simulation Method Section -->
+                <div class="settings-section">
+                    <h4><i class="fas fa-bolt"></i> Simulation Method</h4>
+                    <div class="radio-group settings-radio-group">
+                        <label class="settings-radio-label">
+                            <input type="radio" name="settings-accuracy" value="fast" id="settings-accuracy-fast" checked>
+                            <div class="radio-content">
+                                <strong>Fast (Approximate)</strong>
+                                <span class="radio-desc">Point source approximation. Very fast (~0.1ms), suitable for real-time animation.</span>
+                            </div>
+                        </label>
+                        <label class="settings-radio-label">
+                            <input type="radio" name="settings-accuracy" value="exact" id="settings-accuracy-exact">
+                            <div class="radio-content">
+                                <strong>Exact (Eq. A.4)</strong>
+                                <span class="radio-desc">Full disk integration with radiometric kernel. More accurate but slower.</span>
+                            </div>
+                        </label>
+                    </div>
+                    <p class="settings-note" id="settings-accuracy-note">
+                        <i class="fas fa-info-circle"></i>
+                        Exact mode only applies to "Orientation Aware" model.
+                    </p>
+                </div>
+
+                <!-- Light Source Properties Section -->
+                <div class="settings-section">
+                    <h4><i class="fas fa-lightbulb"></i> Light Source Properties</h4>
+                    <div class="settings-input-row">
+                        <label for="settings-light-diameter">Diameter (mm):</label>
+                        <input type="number" id="settings-light-diameter" value="305" min="50" max="1000" step="5">
+                        <span class="input-hint">Default: 305mm (halogen lamp)</span>
+                    </div>
+                </div>
+
+                <!-- Numerical Integration Section (shown only for Exact mode) -->
+                <div class="settings-section" id="settings-integration-section">
+                    <h4><i class="fas fa-th"></i> Numerical Integration</h4>
+                    <p class="section-desc">Configure Simpson's rule grid for disk integration.</p>
+                    <div class="settings-input-row">
+                        <label for="settings-grid-radial">Radial divisions (n<sub>r</sub>):</label>
+                        <input type="number" id="settings-grid-radial" value="20" min="4" max="100" step="2">
+                    </div>
+                    <div class="settings-input-row">
+                        <label for="settings-grid-angular">Angular divisions (n<sub>φ</sub>):</label>
+                        <input type="number" id="settings-grid-angular" value="20" min="4" max="100" step="2">
+                    </div>
+                    <div class="integration-stats">
+                        <p>Integration points: <strong id="settings-integration-points">400</strong></p>
+                        <p>Estimated time: <strong id="settings-estimated-time">~5-10ms</strong> per sample</p>
+                    </div>
+                </div>
+
+                <!-- Coordinate System Section (read-only) -->
+                <div class="settings-section settings-section-readonly">
+                    <h4><i class="fas fa-axes"></i> Coordinate System</h4>
+                    <div class="readonly-values">
+                        <div class="readonly-item">
+                            <span class="readonly-label">Lamp Normal:</span>
+                            <span class="readonly-value">(0, -1, 0) — pointing downward</span>
+                        </div>
+                        <div class="readonly-item">
+                            <span class="readonly-label">Height Axis:</span>
+                            <span class="readonly-value">Y (vertical)</span>
+                        </div>
+                        <div class="readonly-item">
+                            <span class="readonly-label">Floor Plane:</span>
+                            <span class="readonly-value">XZ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="settings-reset-btn">
+                    <i class="fas fa-undo"></i> Reset Defaults
+                </button>
+                <div class="footer-right">
+                    <button class="btn btn-secondary" id="settings-cancel-btn">Cancel</button>
+                    <button class="btn btn-primary" id="settings-apply-btn">
+                        <i class="fas fa-check"></i> Apply
+                    </button>
+                </div>
             </div>
         </div>
     </div>
