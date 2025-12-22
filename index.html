@@ -12,11 +12,16 @@
     <!-- MathJax for LaTeX rendering -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-  <script type="module" crossorigin src="/assets/index-BcTlI0Vn.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-BFNNHDcs.css">
+  <script type="module" crossorigin src="/assets/index-BvWaT6nz.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-Zla3VXBM.css">
 </head>
 <body>
     <div id="app">
+        <!-- Fullscreen Toggle Button -->
+        <button id="fullscreen-btn" class="fullscreen-btn" title="Toggle Fullscreen">
+            <i class="fas fa-expand"></i>
+        </button>
+        
         <!-- Header -->
         <header>
             <div class="header-content">
@@ -427,24 +432,6 @@
                     </div>
                 </div>
 
-                <!-- Coordinate System Section (read-only) -->
-                <div class="settings-section settings-section-readonly">
-                    <h4><i class="fas fa-axes"></i> Coordinate System</h4>
-                    <div class="readonly-values">
-                        <div class="readonly-item">
-                            <span class="readonly-label">Lamp Normal:</span>
-                            <span class="readonly-value">(0, -1, 0) — pointing downward</span>
-                        </div>
-                        <div class="readonly-item">
-                            <span class="readonly-label">Height Axis:</span>
-                            <span class="readonly-value">Y (vertical)</span>
-                        </div>
-                        <div class="readonly-item">
-                            <span class="readonly-label">Floor Plane:</span>
-                            <span class="readonly-value">XZ</span>
-                        </div>
-                    </div>
-                </div>
             </div>
             
             <div class="modal-footer">
