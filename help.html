@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SolarTrack Radiometric Simulator</title>
+    <link rel="stylesheet" href="/help.css">
+    <!-- KaTeX for equations -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false}
+            ]
+        });"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="help-container">
+        <!-- Header -->
+        <header class="help-header">
+            <div class="header-left">
+                <img src="/assets/solartrack_icon.svg" alt="SolarTrack" class="help-logo">
+                <h1>Radiometric Simulator</h1>
+            </div>
+            <a href="index.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                Simulator
+            </a>
+        </header>
+
+        <div class="help-content">
+            <!-- Navigation Sidebar -->
+            <nav class="help-nav">
+                <ul>
+                    <li><a href="#overview" class="nav-link active"><i class="fas fa-home"></i> Overview</a></li>
+                    <li><a href="#quick-start" class="nav-link"><i class="fas fa-rocket"></i> Quick Start</a></li>
+                    <li><a href="#interface" class="nav-link"><i class="fas fa-chart-line"></i> Power Output</a></li>
+                    <li><a href="#models" class="nav-link"><i class="fas fa-cube"></i> View Factor ℱ</a></li>
+                    <li><a href="#kappa" class="nav-link"><i class="fas fa-sliders-h"></i> Scale κ</a></li>
+                    <li><a href="#advanced" class="nav-link"><i class="fas fa-cog"></i> Advanced Settings</a></li>
+                    <li><a href="#csv-format" class="nav-link"><i class="fas fa-route"></i> Input Format</a></li>
+                    <li><a href="#theory" class="nav-link"><i class="fas fa-book-open"></i> Considerations</a></li>
+                    <li><a href="#citation" class="nav-link"><i class="fas fa-quote-left"></i> Citation</a></li>
+                    <li><a href="#references" class="nav-link"><i class="fas fa-book"></i> References</a></li>
+                </ul>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="help-main">
+                <!-- Overview -->
+                <section id="overview" class="help-section">
+                    <h2><i class="fas fa-home"></i> Overview</h2>
+                    
+                    <figure class="overview-figure">
+                        <img src="/assets/solartrack_overview_doc.png" alt="SolarTrack Overview: Trajectory data flows into the radiometric simulator, producing solar power predictions over time">
+                    </figure>
+
+                    <p class="lead">
+                        The SolarTrack Radiometric Simulator is an interactive tool for visualizing 
+                        and analyzing power harvesting from wearable solar cells under controlled lighting conditions.
+                        It provides radiometric simulation with two physics-based models (Orientation Aware 
+                        and Parallel Disk), configurable light source position and diameter with real-time 
+                        visualization, and export functionality  for simulated power traces in CSV format.
+                    </p>
+
+                    <div class="equation-box">
+                        <p>The fundamental power equation:</p>
+                        $$P = \kappa \cdot \mathcal{F}(a, H) + \epsilon$$
+                        <p class="equation-note">
+                            where $P$ is harvested power, $\kappa$ is the scaling factor, 
+                            $\mathcal{F}$ is the view factor function, and $\epsilon$ is noise.
+                        </p>
+                    </div>
+
+                    <div class="further-reading-note">
+                        <p>
+                            <i class="fas fa-book-open"></i> <strong>View factor $\mathcal{F}$:</strong> 
+                            The fraction of radiant energy leaving the light source surface that strikes 
+                            the solar cell surface directly. It depends purely on the geometry—the relative 
+                            position, orientation, and size of the two surfaces.
+                        </p>
+                        <p style="margin-top: 0.75rem;">
+                            For background on view factor theory, see 
+                            <a href="#ref-modest">Modest [1, Ch. 4]</a> and <a href="#ref-bergman">Bergman et al. [2, Ch. 13]</a>.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Quick Start - Equation-Driven Interactive Guide -->
+                <section id="quick-start" class="help-section">
+                    <h2><i class="fas fa-rocket"></i> Quick Start</h2>
+                    
+                    <p class="section-intro">
+                        Everything in the simulator connects to one equation. Hover over each symbol to see what it controls:
+                    </p>
+
+                    <!-- The Central Equation - Interactive with hover effects -->
+                    <div class="equation-guide" id="equation-guide">
+                        <div class="equation-display-box">
+                            <div class="eq-formula">
+                                <span class="eq-term" data-target="power">
+                                    <span class="eq-symbol">P</span>
+                                    <span class="eq-label">power</span>
+                                </span>
+                                <span class="eq-op">=</span>
+                                <span class="eq-term" data-target="kappa">
+                                    <span class="eq-symbol">κ</span>
+                                    <span class="eq-label">scale</span>
+                                </span>
+                                <span class="eq-op">·</span>
+                                <span class="eq-term" data-target="viewfactor">
+                                    <span class="eq-symbol">ℱ</span>
+                                    <span class="eq-label">model</span>
+                                </span>
+                                <span class="eq-paren">(</span>
+                                <span class="eq-term" data-target="geometry">
+                                    <span class="eq-symbol">a, H</span>
+                                    <span class="eq-label">geometry</span>
+                                </span>
+                                <span class="eq-paren">)</span>
+                                <span class="eq-op">+</span>
+                                <span class="eq-term-static">
+                                    <span class="eq-symbol">ε</span>
+                                    <span class="eq-label">noise</span>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Dynamic connector lines drawn by JavaScript -->
+                        <svg class="equation-connectors-svg" id="connectors-svg"></svg>
+                        
+                        <!-- Step cards aligned below equation symbols - clickable links to sections -->
+                        <div class="equation-steps">
+                            <a href="#interface" class="eq-step-card" data-target="power">
+                                <div class="card-icon"><i class="fas fa-chart-line"></i></div>
+                                <h4>Power Output</h4>
+                                <p>The simulated power curve (purple) in the chart — this is the prediction target.</p>
+                            </a>
+                            
+                            <a href="#kappa" class="eq-step-card" data-target="kappa">
+                                <div class="card-icon"><i class="fas fa-cog"></i></div>
+                                <h4>κ (Kappa)</h4>
+                                <p>Scaling factor combining cell efficiency η, cell area A, and light intensity I₀.</p>
+                            </a>
+                            
+                            <a href="#models" class="eq-step-card" data-target="viewfactor">
+                                <div class="card-icon"><i class="fas fa-calculator"></i></div>
+                                <h4>View Factor</h4>
+                                <p>Choose <strong>Orientation Aware</strong> or <strong>Parallel Disk</strong> model.</p>
+                            </a>
+                            
+                            <a href="#theory" class="eq-step-card" data-target="geometry">
+                                <div class="card-icon"><i class="fas fa-arrows-alt"></i></div>
+                                <h4>Geometry</h4>
+                                <p>Lateral offset (a) and vertical separation (H) from trajectory and light position.</p>
+                            </a>
+                            
+                        </div>
+                    </div>
+                    
+                    <script>
+                    // Interactive equation hover effects and dynamic connector lines
+                    (function() {
+                        const guide = document.getElementById('equation-guide');
+                        if (!guide) return;
+                        
+                        const svg = document.getElementById('connectors-svg');
+                        const terms = guide.querySelectorAll('.eq-term');
+                        const cards = guide.querySelectorAll('.eq-step-card');
+                        
+                        // Color mapping for each target
+                        // Use unified purple color for all connectors
+                        const lineColor = '#71558C';
+                        
+                        // Draw connector lines
+                        function drawConnectors() {
+                            if (!svg) return;
+                            svg.innerHTML = '';
+                            
+                            const guideRect = guide.getBoundingClientRect();
+                            const svgRect = svg.getBoundingClientRect();
+                            
+                            terms.forEach(term => {
+                                const target = term.dataset.target;
+                                const card = guide.querySelector(`.eq-step-card[data-target="${target}"]`);
+                                if (!card) return;
+                                
+                                const termRect = term.getBoundingClientRect();
+                                const cardRect = card.getBoundingClientRect();
+                                
+                                // Calculate positions relative to SVG
+                                const x1 = termRect.left + termRect.width/2 - svgRect.left;
+                                const y1 = 0;
+                                const x2 = cardRect.left + cardRect.width/2 - svgRect.left;
+                                const y2 = svgRect.height;
+                                
+                                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                                line.setAttribute('x1', x1);
+                                line.setAttribute('y1', y1);
+                                line.setAttribute('x2', x2);
+                                line.setAttribute('y2', y2);
+                                line.setAttribute('stroke', lineColor);
+                                line.setAttribute('stroke-width', '2');
+                                line.setAttribute('stroke-dasharray', '4,3');
+                                line.setAttribute('data-target', target);
+                                line.classList.add('connector-line');
+                                svg.appendChild(line);
+                            });
+                        }
+                        
+                        // Hover effects
+                        function highlightTarget(target, active) {
+                            const term = guide.querySelector(`.eq-term[data-target="${target}"]`);
+                            const card = guide.querySelector(`.eq-step-card[data-target="${target}"]`);
+                            const line = svg.querySelector(`.connector-line[data-target="${target}"]`);
+                            
+                            if (term) term.classList.toggle('active', active);
+                            if (card) card.classList.toggle('active', active);
+                            if (line) {
+                                line.setAttribute('stroke-width', active ? '3' : '2');
+                                line.setAttribute('stroke-dasharray', active ? 'none' : '4,3');
+                                line.style.opacity = active ? '1' : '0.6';
+                            }
+                        }
+                        
+                        // Add event listeners
+                        terms.forEach(term => {
+                            term.addEventListener('mouseenter', () => highlightTarget(term.dataset.target, true));
+                            term.addEventListener('mouseleave', () => highlightTarget(term.dataset.target, false));
+                        });
+                        
+                        cards.forEach(card => {
+                            card.addEventListener('mouseenter', () => highlightTarget(card.dataset.target, true));
+                            card.addEventListener('mouseleave', () => highlightTarget(card.dataset.target, false));
+                        });
+                        
+                        // Initial draw and redraw on resize
+                        setTimeout(drawConnectors, 100);
+                        window.addEventListener('resize', drawConnectors);
+                    })();
+                    </script>
+                </section>
+                
+                <!-- ORIGINAL QUICK START (kept for easy revert) -->
+                <!--
+                <section id="quick-start-original" class="help-section">
+                    <h2><i class="fas fa-rocket"></i> Quick Start</h2>
+                    
+                    <div class="steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>Select a Trajectory</h4>
+                                <p>Choose from preloaded trajectories (Circle, One, Two, Three, Triangle) 
+                                   or upload your own motion capture CSV file.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>Choose a Radiometric Model</h4>
+                                <p>Select Orientation Aware (accounts for cell tilt) or 
+                                   Parallel Disk (assumes cell always faces the light).</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>Adjust Light Position</h4>
+                                <p>Use the X, Y, Z sliders to position the light source. 
+                                   The simulation updates in real-time.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h4>Play the Animation</h4>
+                                <p>Click Play to animate the hand moving through the trajectory. 
+                                   Adjust speed with the slider.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">5</div>
+                            <div class="step-content">
+                                <h4>Analyze Results</h4>
+                                <p>Compare the real power curve (orange) with the simulated curve (purple) 
+                                   in the chart below the 3D view.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                -->
+
+                <!-- Power Output (Interface Guide) -->
+                <section id="interface" class="help-section">
+                    <h2><i class="fas fa-chart-line"></i> Power Output</h2>
+                    
+                    <figure class="screenshot-figure">
+                        <img src="/assets/solar_track_simulator_UI.jpg" alt="SolarTrack Simulator Interface">
+                        <figcaption>The SolarTrack Radiometric Simulator interface showing the controls panel (left), 3D visualization (center), and power chart (bottom).</figcaption>
+                    </figure>
+                    
+                    <h3>Controls Panel</h3>
+                    <table class="help-table">
+                        <thead>
+                            <tr>
+                                <th>Control</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Trajectory</strong></td>
+                                <td>Select from preloaded gestures or choose "Custom" to draw your own</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Upload Motion Capture</strong></td>
+                                <td>Load a CSV file with motion capture data (see <a href="#csv-format">Input Trajectory Format</a>)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Radiometric Model</strong></td>
+                                <td>Choose between Orientation Aware and Parallel Disk models</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Light Position (X, Y, Z)</strong></td>
+                                <td>Adjust the 3D position of the light source in millimeters</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Animation Controls</strong></td>
+                                <td>Play, Pause, and Reset the trajectory animation</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Speed</strong></td>
+                                <td>Adjust animation playback speed (0.1x to 10x)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>3D View</h3>
+                    <ul>
+                        <li><strong>Orbit:</strong> Click and drag to rotate the view</li>
+                        <li><strong>Zoom:</strong> Scroll wheel to zoom in/out</li>
+                        <li><strong>Pan:</strong> Right-click and drag to pan</li>
+                        <li><strong>Trajectory color:</strong> Indicates relative power (dark = low, bright = high)</li>
+                    </ul>
+
+                    <h3>Current State Panel</h3>
+                    <table class="help-table">
+                        <thead>
+                            <tr>
+                                <th>Variable</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>$a$</td>
+                                <td>Lateral displacement from light source axis (mm)</td>
+                            </tr>
+                            <tr>
+                                <td>$H$</td>
+                                <td>Vertical distance from light source (mm)</td>
+                            </tr>
+                            <tr>
+                                <td>$\theta_c$</td>
+                                <td>Cell tilt angle relative to light direction (degrees)</td>
+                            </tr>
+                            <tr>
+                                <td>Power</td>
+                                <td>Simulated instantaneous power (µW)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </section>
+
+                <!-- View Factor Models -->
+                <section id="models" class="help-section">
+                    <h2><i class="fas fa-cube"></i> View Factor ℱ</h2>
+                    
+                    <p>The simulator supports two radiometric models for computing the view factor 
+                       between the light source and the solar cell.</p>
+
+                    <figure class="model-comparison-figure">
+                        <img src="/assets/parallel_vs_orientation.png" alt="Comparison of Parallel Disk and Orientation Aware models: Parallel assumes cell normals always point upward, while Orientation Aware accounts for actual cell tilt">
+                    </figure>
+
+                    <div class="model-card">
+                        <h3><i class="fas fa-circle"></i> Parallel Disk Model</h3>
+                        <p>
+                            This simplified model assumes the solar cell is always <strong>parallel</strong> 
+                            to the light source disk (i.e., facing directly upward). It ignores cell tilt.
+                        </p>
+                        
+                        <div class="equation-box collapsible collapsed">
+                            <div class="eq-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                                <span class="eq-title">Parallel View Factor</span>
+                                <i class="fas fa-chevron-down eq-toggle"></i>
+                            </div>
+                            <div class="eq-content">
+                                $$\bar{\mathcal{F}} = H^2 \int_0^{D/2} \int_0^{2\pi} \frac{r'}{(r'^2 - 2ar'\cos\phi + a^2 + H^2)^2} \, d\phi \, dr'$$
+                                <p class="equation-note">
+                                    where $H$ is the vertical separation (cell below lamp, $H > 0$), $a$ is the lateral offset, 
+                                    $D$ is the disk diameter, and $(r', \phi)$ are polar coordinates on the disk.
+                                </p>
+                            </div>
+                        </div>
+
+                        <p class="model-note">
+                            <strong>Best for:</strong> Overhead lighting with minimal hand tilt. 
+                            <strong>Requires:</strong> Position data only (no cell normals needed).
+                        </p>
+                    </div>
+
+                    <div class="model-card">
+                        <h3><i class="fas fa-compass"></i> Orientation Aware Model</h3>
+                        <p>
+                            This model accounts for the <strong>tilt angle</strong> of the solar cell 
+                            relative to the light source. It uses the full radiometric kernel that 
+                            considers both the emitter and receiver orientations.
+                        </p>
+                        
+                        <div class="equation-box collapsible collapsed">
+                            <div class="eq-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                                <span class="eq-title">Orientation Aware View Factor (approximate)</span>
+                                <i class="fas fa-chevron-down eq-toggle"></i>
+                            </div>
+                            <div class="eq-content">
+                                $$\mathcal{F} = \bar{\mathcal{F}} \cdot \cos\theta_c$$
+                                <p class="equation-note">
+                                    where $\bar{\mathcal{F}}$ is the parallel disk view factor (Eq. A.5)
+                                    and $\theta_c$ is the angle between the cell normal and the direction to the light.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="equation-box collapsible collapsed">
+                            <div class="eq-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                                <span class="eq-title">Orientation Aware View Factor (exact)</span>
+                                <i class="fas fa-chevron-down eq-toggle"></i>
+                            </div>
+                            <div class="eq-content">
+                                $$\mathcal{F} = \int_0^{D/2} \int_0^{2\pi} \frac{(\mathbf{R} \cdot \mathbf{n}_e)(-\mathbf{R} \cdot \mathbf{n}_c)}{\|\mathbf{R}\|^4} \, r' \, d\phi \, dr'$$
+                                <p class="equation-note">
+                                    Full disk integration over the emitter disk of diameter $D$, where $\mathbf{R} = \mathbf{x} - \mathbf{x}'$ is the 
+                                    vector from emitter patch $\mathbf{x}'$ to cell $\mathbf{x}$, $\mathbf{n}_e$ is the emitter normal, 
+                                    and $\mathbf{n}_c$ is the cell normal.
+                                </p>
+                            </div>
+                        </div>
+
+                        <p class="model-note">
+                            <strong>Best for:</strong> Tilted or rotating cells where orientation matters. 
+                            <strong>Requires:</strong> Position + cell normal vectors.
+                        </p>
+                        <p class="model-note">
+                            <i class="fas fa-cog"></i> To switch between approximate and exact modes, 
+                            see <a href="#advanced">Advanced Settings</a>.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Scale κ (Kappa Parameter) -->
+                <section id="kappa" class="help-section">
+                    <h2><i class="fas fa-sliders-h"></i> Scale κ</h2>
+                    
+                    <p>
+                        The scaling factor $\kappa$ converts the dimensionless view factor $\mathcal{F}$ 
+                        into actual power values. It encapsulates all the physical constants and 
+                        calibration factors of the system.
+                    </p>
+
+                    <div class="equation-box collapsible collapsed">
+                        <div class="eq-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                            <span class="eq-title">κ Definition</span>
+                            <i class="fas fa-chevron-down eq-toggle"></i>
+                        </div>
+                        <div class="eq-content">
+                            $$\kappa = \eta \cdot A_{\text{cell}} \cdot I_0$$
+                            <p class="equation-note">
+                                where $\eta$ is the solar cell efficiency, $A_{\text{cell}}$ is the cell area, 
+                                and $I_0$ is the effective irradiance from the light source.
+                            </p>
+                        </div>
+                    </div>
+
+                    <h3>Configuration Options</h3>
+                    
+                    <div class="option-card">
+                        <h4><i class="fas fa-edit"></i> Manual Input</h4>
+                        <p>
+                            Enter a custom $\kappa$ value directly. Useful when you have a known 
+                            calibration value from prior experiments or want to explore how scaling affects the output.
+                        </p>
+                    </div>
+
+                    <div class="option-card">
+                        <h4><i class="fas fa-flask"></i> Estimate from Physical Parameters</h4>
+                        <p>
+                            Estimate $\kappa$ from physical properties when actual values are known:
+                        </p>
+                        <ul>
+                            <li><strong>Solar cell efficiency</strong> (typical: 10-25%)</li>
+                            <li><strong>Cell area</strong> in cm²</li>
+                            <li><strong>Light source power</strong> in Watts</li>
+                        </ul>
+                    </div>
+
+                    <div class="option-card">
+                        <h4><i class="fas fa-calculator"></i> Fit from Real Data</h4>
+                        <p>
+                            When <em>measured</em> power data is uploaded alongside trajectory data, 
+                            the simulator can automatically fit $\kappa$ using least-squares regression:
+                        </p>
+                        $$\kappa_{\text{opt}} = \arg\min_\kappa \sum_i (P_{\text{real},i} - \kappa \cdot \mathcal{F}_i)^2$$
+                        <p class="equation-note">
+                            where $i$ indexes over trajectory samples, $P_{\text{real},i}$ is the measured power 
+                            at sample $i$, and $\mathcal{F}_i$ is the computed view factor at that position.
+                        </p>
+                        <p>
+                            <strong>Why this option?</strong> This is useful for <em>validating</em> the model against 
+                            experimental data or <em>calibrating</em> $\kappa$ for a specific hardware setup. 
+                            It requires real power measurements, which are not always available in simulation-only workflows.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Advanced Settings -->
+                <section id="advanced" class="help-section">
+                    <h2><i class="fas fa-cog"></i> Advanced Settings</h2>
+                    
+                    <p>Access advanced settings by clicking the <i class="fas fa-cog"></i> gear icon 
+                       in the Controls panel header.</p>
+
+                    <h3>Simulation Method (Orientation Aware)</h3>
+                    <table class="help-table">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Fast (Approximate)</strong></td>
+                                <td>Point source approximation with $\cos\theta_c$ correction</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Exact</strong></td>
+                                <td>Full disk integration using Simpson's rule</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Light Source Properties</h3>
+                    <ul>
+                        <li><strong>Diameter (mm):</strong> The diameter of the light source disk. 
+                            Default is 100mm. Larger values spread the light over a wider area.</li>
+                    </ul>
+
+                    <h3>Numerical Integration (Exact Mode Only)</h3>
+                    <p>These settings control the Simpson's rule grid for disk integration:</p>
+                    <ul>
+                        <li><strong>Radial divisions ($n_r$):</strong> Number of divisions along the radius (default: 20)</li>
+                        <li><strong>Angular divisions ($n_\phi$):</strong> Number of divisions around the circumference (default: 40)</li>
+                    </ul>
+                    <p class="note">
+                        Higher values increase accuracy but slow down computation. 
+                        Total integration points = $n_r \times n_\phi$.
+                    </p>
+
+                    <h3>Visualization</h3>
+                    <ul>
+                        <li><strong>Color threshold (samples):</strong> For trajectories with more samples 
+                            than this threshold, the drawing animation uses a uniform color instead of 
+                            power-coded colors for better performance. Default: 4000.</li>
+                    </ul>
+                </section>
+
+                <!-- CSV Format -->
+                <section id="csv-format" class="help-section">
+                    <h2><i class="fas fa-file-csv"></i> Input Trajectory Format</h2>
+                    
+                    <p>
+                        The simulator accepts CSV files with motion capture data. 
+                        Several column naming conventions are supported.
+                    </p>
+
+                    <h3>Supported Formats</h3>
+
+                    <div class="format-card">
+                        <h4>Format 1: Leap Motion Raw</h4>
+                        <p>Direct output from Leap Motion SDK:</p>
+                        <div class="code-block">
+                            <code>time, leap_palm_x, leap_palm_y, leap_palm_z, leap_palm_normal_x, leap_palm_normal_y, leap_palm_normal_z, v_dc, i_dc</code>
+                        </div>
+                    </div>
+
+                    <div class="format-card">
+                        <h4>Format 2: Simplified Leap</h4>
+                        <p>Shortened column names:</p>
+                        <div class="code-block">
+                            <code>timestamp, palm_pos_x, palm_pos_y, palm_pos_z, palm_normal_x, palm_normal_y, palm_normal_z, power</code>
+                        </div>
+                    </div>
+
+                    <div class="format-card">
+                        <h4>Format 3: Generic XYZ</h4>
+                        <p>Minimal format with positions and normals:</p>
+                        <div class="code-block">
+                            <code>x, y, z, nx, ny, nz, power, time</code>
+                        </div>
+                    </div>
+
+                    <h3>Column Descriptions</h3>
+                    <table class="help-table">
+                        <thead>
+                            <tr>
+                                <th>Column</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>x, y, z</code> (or variants)</td>
+                                <td><span class="required">Yes</span></td>
+                                <td>Palm/cell position in millimeters</td>
+                            </tr>
+                            <tr>
+                                <td><code>nx, ny, nz</code> (or variants)</td>
+                                <td><span class="optional">Optional</span></td>
+                                <td>Cell normal vector (unit vector). Required for Orientation Aware model.</td>
+                            </tr>
+                            <tr>
+                                <td><code>v_dc</code></td>
+                                <td><span class="optional">Optional</span></td>
+                                <td>Measured voltage (V)</td>
+                            </tr>
+                            <tr>
+                                <td><code>i_dc</code></td>
+                                <td><span class="optional">Optional</span></td>
+                                <td>Measured current (A). Power = v_dc × i_dc</td>
+                            </tr>
+                            <tr>
+                                <td><code>power</code></td>
+                                <td><span class="optional">Optional</span></td>
+                                <td>Direct power measurement (alternative to v_dc/i_dc)</td>
+                            </tr>
+                            <tr>
+                                <td><code>time</code> or <code>timestamp</code></td>
+                                <td><span class="optional">Optional</span></td>
+                                <td>Time stamp for each sample</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Example CSV</h3>
+                    <div class="code-block">
+<pre>time,leap_palm_x,leap_palm_y,leap_palm_z,leap_palm_normal_x,leap_palm_normal_y,leap_palm_normal_z,v_dc,i_dc
+0.00,-45.2,655.8,120.4,0.15,0.92,-0.36,0.48,0.00052
+0.01,-44.8,655.1,121.3,0.14,0.93,-0.35,0.49,0.00051
+0.02,-43.9,654.2,122.1,0.13,0.94,-0.33,0.47,0.00053
+...</pre>
+                    </div>
+
+                    <div class="info-box">
+                        <h4><i class="fas fa-info-circle"></i> Notes</h4>
+                        <ul>
+                            <li>All position values should be in <strong>millimeters</strong></li>
+                            <li>Normal vectors should be <strong>unit vectors</strong> (length ≈ 1)</li>
+                            <li>The cell normal points <strong>away from the palm</strong> (opposite to palm normal)</li>
+                            <li>Files are processed entirely in your browser — no data is uploaded to servers</li>
+                        </ul>
+                    </div>
+
+                    <h3>Export Format</h3>
+                    <p>When you export simulation results, the CSV contains:</p>
+                    <div class="code-block">
+                        <code>timestamp, simulated_power_W, a_mm, H_mm, theta_deg</code>
+                    </div>
+                    <table class="help-table">
+                        <thead>
+                            <tr>
+                                <th>Column</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>timestamp</code></td>
+                                <td>Time in seconds</td>
+                            </tr>
+                            <tr>
+                                <td><code>simulated_power_W</code></td>
+                                <td>Simulated power output in Watts</td>
+                            </tr>
+                            <tr>
+                                <td><code>a_mm</code></td>
+                                <td>Lateral offset from light source (mm)</td>
+                            </tr>
+                            <tr>
+                                <td><code>H_mm</code></td>
+                                <td>Vertical separation from light source (mm)</td>
+                            </tr>
+                            <tr>
+                                <td><code>theta_deg</code></td>
+                                <td>Cell tilt angle in degrees (Orientation Aware model only)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="note">The export file also includes metadata comments at the top with gesture name, model type, light position, and κ value if applicable.</p>
+                </section>
+
+                <!-- Modeling Considerations -->
+                <section id="theory" class="help-section">
+                    <h2><i class="fas fa-book-open"></i> Modeling Considerations</h2>
+                    
+                    <div class="info-box">
+                        <p>The radiometric model makes the following assumptions (as stated in the paper):</p>
+                        <ul>
+                            <li><strong>Single dominant emitter:</strong> One light source dominates the irradiance at the cell.</li>
+                            <li><strong>Uniform irradiance over cell:</strong> The cell is small enough that irradiance is approximately constant over its surface, enabling the simplification $P \approx \eta A_c I(\cdot)$.</li>
+                            <li><strong>Lambertian emission profile:</strong> The emitter has an angular profile $\cos^m(\theta_e)$ with $m = 1$ (Lambertian approximation).</li>
+                            <li><strong>Cell below lamp:</strong> The vertical separation $H > 0$ (cell is below the light source).</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- Geometry (a, H) -->
+                <!-- Citation -->
+                <section id="citation" class="help-section">
+                    <h2><i class="fas fa-quote-left"></i> Citation</h2>
+                    
+                    <p>If you find this work useful, please cite:</p>
+                    <div class="citation-box">
+                        <div class="bibtex-block">
+<pre id="bibtex-content">@inproceedings{ghalwash2026solartrack,
+  title     = {SolarTrack: Exploring the Continuous Tracking Capabilities of Wearable Solar Harvesters},
+  author    = {Yasien Ghalwash and Abdelwahed Khamis and Moid Sandhu and Sara Khalifa and Raja Jurdak},
+  booktitle = {Proceedings of the 24th IEEE International Conference on Pervasive Computing and Communications (PerCom)},
+  year      = {2026}
+}</pre>
+                            <button class="copy-btn" onclick="copyBibtex()" title="Copy to clipboard">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <script>
+                    function copyBibtex() {
+                        const bibtex = document.getElementById('bibtex-content').textContent;
+                        navigator.clipboard.writeText(bibtex).then(() => {
+                            const btn = document.querySelector('.copy-btn');
+                            btn.innerHTML = '<i class="fas fa-check"></i>';
+                            btn.classList.add('copied');
+                            setTimeout(() => {
+                                btn.innerHTML = '<i class="fas fa-copy"></i>';
+                                btn.classList.remove('copied');
+                            }, 2000);
+                        });
+                    }
+                    </script>
+                </section>
+
+                <!-- References -->
+                <section id="references" class="help-section">
+                    <h2><i class="fas fa-book"></i> References</h2>
+                    
+                    <ol class="reference-list">
+                        <li id="ref-modest">
+                            Modest, M. F. (2013). <em>Radiative Heat Transfer</em> (3rd ed.). 
+                            Academic Press. — Chapter 4: View Factors.
+                        </li>
+                        <li id="ref-bergman">
+                            Bergman, T. L., Lavine, A. S., Incropera, F. P., & DeWitt, D. P. (2017). 
+                            <em>Fundamentals of Heat and Mass Transfer</em> (8th ed.). 
+                            Wiley. — Chapter 13: Radiation Exchange Between Surfaces.
+                        </li>
+                    </ol>
+
+                    <h3>Contact</h3>
+                    <p>
+                        For questions or feedback about the simulator, please open an issue on the 
+                        GitHub repository or contact the authors.
+                    </p>
+                </section>
+            </main>
+        </div>
+
+        <!-- Footer -->
+        <footer class="help-footer">
+            <p>SolarTrack Radiometric Simulator</p>
+        </footer>
+    </div>
+
+    <!-- Smooth scrolling and active nav highlighting -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('.help-section');
+            
+            // Smooth scroll
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetSection = document.getElementById(targetId);
+                    if (targetSection) {
+                        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+            
+            // Active section highlighting
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href') === '#' + id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, { threshold: 0.2, rootMargin: '-100px 0px -50% 0px' });
+            
+            sections.forEach(section => observer.observe(section));
+        });
+    </script>
+</body>
+</html>
+
