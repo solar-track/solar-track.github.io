@@ -20,6 +20,15 @@ import {
     calculateCorrelation,
     CONSTANTS
 } from './simulator.js';
+import { 
+    simulateSolarPowerExact, 
+    updateSettings as updateExactSettings, 
+    resetSettings as resetExactSettings,
+    getSettings as getExactSettings,
+    getIntegrationInfo,
+    DEFAULT_INTEGRATION_R,
+    DEFAULT_INTEGRATION_PHI
+} from './simulator_exact.js';
 
 class SolarTrackDemo {
     constructor() {
@@ -33,6 +42,7 @@ class SolarTrackDemo {
         this.currentGestureData = null;
         this.uploadedGestureCache = null; // Cache for uploaded CSV data
         this.currentModel = 'oriented';
+        this.currentAccuracy = 'fast'; // 'fast' (approximate) or 'exact' (Eq. A.4)
         this.lightPosition = [...CONSTANTS.SOURCE_CENTER];
         this.originalLightPosition = [...CONSTANTS.SOURCE_CENTER];
         this.lightPositionModified = false;
@@ -92,7 +102,7 @@ class SolarTrackDemo {
     cacheElements() {
         this.elements = {
             gestureSelect: document.getElementById('gesture-select'),
-            modelRadios: document.getElementsByName('model'),
+            modelRadios: document.querySelectorAll('input[name="model"]'),
             lightXSlider: document.getElementById('light-x'),
             lightYSlider: document.getElementById('light-y'),
             lightZSlider: document.getElementById('light-z'),
@@ -112,7 +122,24 @@ class SolarTrackDemo {
             metricRmse: document.getElementById('metric-rmse'),
             metricR2: document.getElementById('metric-r2'),
             metricCorr: document.getElementById('metric-corr'),
-            exportCsvBtn: document.getElementById('export-csv-btn')
+            exportCsvBtn: document.getElementById('export-csv-btn'),
+            // Settings modal elements
+            settingsBtn: document.getElementById('settings-btn'),
+            settingsModal: document.getElementById('settings-modal'),
+            settingsModalClose: document.getElementById('settings-modal-close'),
+            settingsAccuracyFast: document.getElementById('settings-accuracy-fast'),
+            settingsAccuracyExact: document.getElementById('settings-accuracy-exact'),
+            settingsLightDiameter: document.getElementById('settings-light-diameter'),
+            settingsGridRadial: document.getElementById('settings-grid-radial'),
+            settingsGridAngular: document.getElementById('settings-grid-angular'),
+            settingsIntegrationPoints: document.getElementById('settings-integration-points'),
+            settingsEstimatedTime: document.getElementById('settings-estimated-time'),
+            settingsIntegrationSection: document.getElementById('settings-integration-section'),
+            settingsColorThreshold: document.getElementById('settings-color-threshold'),
+            settingsAccuracyNote: document.getElementById('settings-accuracy-note'),
+            settingsResetBtn: document.getElementById('settings-reset-btn'),
+            settingsCancelBtn: document.getElementById('settings-cancel-btn'),
+            settingsApplyBtn: document.getElementById('settings-apply-btn')
         };
     }
     
@@ -127,9 +154,13 @@ class SolarTrackDemo {
             radio.addEventListener('change', (e) => {
                 this.currentModel = e.target.value;
                 this.updateThetaVisibility();
+                this.updateAccuracyVisibility();
                 this.recomputeSimulation();
             });
         });
+        
+        // Settings modal
+        this.setupSettingsModal();
         
         // Light position sliders
         this.elements.lightXSlider.addEventListener('input', (e) => {
@@ -313,6 +344,15 @@ class SolarTrackDemo {
             } else {
                 thetaItem.style.display = 'flex';
             }
+        }
+    }
+    
+    updateAccuracyVisibility() {
+        // Exact mode only applies to Orientation Aware model
+        // Force fast mode if parallel is selected and exact was chosen
+        if (this.currentModel === 'parallel' && this.currentAccuracy === 'exact') {
+            this.currentAccuracy = 'fast';
+            console.log('Switched to fast mode (exact not available for Parallel Disk model)');
         }
     }
     
@@ -516,16 +556,40 @@ class SolarTrackDemo {
     recomputeSimulation() {
         if (!this.currentGestureData) return;
         
-        console.log(`Recomputing with model: ${this.currentModel}, light: ${this.lightPosition}`);
+        // Determine which simulator to use
+        const useExact = this.currentAccuracy === 'exact' && this.currentModel === 'oriented';
         
-        // Simulate with current settings
-        const result = simulateSolarPower(
-            this.currentGestureData.positions,
-            this.currentGestureData.normals,
-            this.currentModel,
-            this.lightPosition,
-            this.currentGestureData.light_source.diameter
-        );
+        // Get effective diameter - use settings override if set, otherwise gesture's diameter
+        const exactSettings = getExactSettings();
+        const effectiveDiameter = exactSettings.lightDiameterOverride !== null 
+            ? exactSettings.lightDiameterOverride 
+            : this.currentGestureData.light_source.diameter;
+        
+        console.log(`Recomputing with model: ${this.currentModel}, accuracy: ${this.currentAccuracy}, useExact: ${useExact}, light: ${this.lightPosition}, diameter: ${effectiveDiameter}mm`);
+        
+        // Simulate with current settings - use exact or approximate based on accuracy mode
+        let result;
+        if (useExact) {
+            console.log('🔬 Using EXACT simulator (Eq. A.4)...');
+            const startTime = performance.now();
+            result = simulateSolarPowerExact(
+                this.currentGestureData.positions,
+                this.currentGestureData.normals,
+                this.lightPosition,
+                effectiveDiameter,
+                this.currentModel
+            );
+            const elapsed = performance.now() - startTime;
+            console.log(`🔬 Exact simulation completed in ${elapsed.toFixed(1)}ms`);
+        } else {
+            result = simulateSolarPower(
+                this.currentGestureData.positions,
+                this.currentGestureData.normals,
+                this.currentModel,
+                this.lightPosition,
+                effectiveDiameter
+            );
+        }
         
         let scaledPower;
         
@@ -606,15 +670,32 @@ class SolarTrackDemo {
             ? 1.0 / (gestureData.timestamps[1] - gestureData.timestamps[0])
             : 30.0; // Default 30 fps
         
-        // Simulate with current model
-        const resultOriented = simulateSolarPower(
-            gestureData.positions,
-            gestureData.normals,
-            'oriented',
-            this.lightPosition,
-            CONSTANTS.SOURCE_DIAMETER
-        );
+        // Simulate with current model - use exact if selected for oriented model
+        const useExact = this.currentAccuracy === 'exact';
+        let resultOriented;
         
+        if (useExact) {
+            console.log('🔬 Using EXACT simulator for uploaded gesture...');
+            const startTime = performance.now();
+            resultOriented = simulateSolarPowerExact(
+                gestureData.positions,
+                gestureData.normals,
+                this.lightPosition,
+                CONSTANTS.SOURCE_DIAMETER,
+                'oriented'
+            );
+            console.log(`🔬 Exact simulation completed in ${(performance.now() - startTime).toFixed(1)}ms`);
+        } else {
+            resultOriented = simulateSolarPower(
+                gestureData.positions,
+                gestureData.normals,
+                'oriented',
+                this.lightPosition,
+                CONSTANTS.SOURCE_DIAMETER
+            );
+        }
+        
+        // Parallel model doesn't benefit from exact integration
         const resultParallel = simulateSolarPower(
             gestureData.positions,
             gestureData.normals,
@@ -715,12 +796,18 @@ class SolarTrackDemo {
             this.currentGestureData.current_sim
         );
         
-        // Update chart - Don't show real power for uploaded files
+        // Update chart - Show real power if available in uploaded file
+        console.log('Chart update for uploaded file:', {
+            hasRealPower: this.currentGestureData.real_power !== null,
+            realPowerLength: this.currentGestureData.real_power?.length,
+            realPowerSample: this.currentGestureData.real_power?.slice(0, 3),
+            simLength: this.currentGestureData.current_sim?.length
+        });
         this.powerChart.updateData(
-            null, // Don't show real power curve for uploaded files
+            this.currentGestureData.real_power, // Show real power if available
             this.currentGestureData.current_sim,
             this.currentGestureData.sampling_rate,
-            false, // No fade since no real power shown
+            false, // No fade
             false // Not custom
         );
         
@@ -872,6 +959,9 @@ class SolarTrackDemo {
         if (mobilePlayBtn) mobilePlayBtn.disabled = true;
         if (mobilePauseBtn) mobilePauseBtn.disabled = false;
         
+        // Start trajectory drawing from current position
+        this.scene3d.setPlayState(true);
+        
         this.animate();
     }
     
@@ -886,6 +976,9 @@ class SolarTrackDemo {
         if (mobilePlayBtn) mobilePlayBtn.disabled = false;
         if (mobilePauseBtn) mobilePauseBtn.disabled = true;
         
+        // Keep partial trajectory visible when paused
+        // (don't call setPlayState(false) to preserve current draw state)
+        
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
             this.animationId = null;
@@ -895,6 +988,10 @@ class SolarTrackDemo {
     reset() {
         this.pause();
         this.currentFrame = 0;
+        
+        // Show full trajectory when reset
+        this.scene3d.resetTrajectory();
+        
         this.updateFrame();
     }
     
@@ -1233,10 +1330,181 @@ class SolarTrackDemo {
         
         console.log('✓ Visualization updated with new κ');
     }
+    
+    // =====================================================
+    // Settings Modal
+    // =====================================================
+    
+    setupSettingsModal() {
+        const modal = this.elements.settingsModal;
+        const btn = this.elements.settingsBtn;
+        
+        if (!modal || !btn) {
+            console.warn('Settings modal elements not found');
+            return;
+        }
+        
+        // Open modal
+        btn.addEventListener('click', () => this.openSettingsModal());
+        
+        // Close modal
+        this.elements.settingsModalClose.addEventListener('click', () => this.closeSettingsModal());
+        this.elements.settingsCancelBtn.addEventListener('click', () => this.closeSettingsModal());
+        
+        // Close on background click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                this.closeSettingsModal();
+            }
+        });
+        
+        // Accuracy radio change - show/hide integration section
+        const accuracyRadios = document.querySelectorAll('input[name="settings-accuracy"]');
+        accuracyRadios.forEach(radio => {
+            radio.addEventListener('change', () => this.updateSettingsIntegrationVisibility());
+        });
+        
+        // Grid resolution inputs - update computed values
+        this.elements.settingsGridRadial.addEventListener('input', () => this.updateIntegrationStats());
+        this.elements.settingsGridAngular.addEventListener('input', () => this.updateIntegrationStats());
+        
+        // Reset defaults
+        this.elements.settingsResetBtn.addEventListener('click', () => this.resetSettingsToDefaults());
+        
+        // Apply settings
+        this.elements.settingsApplyBtn.addEventListener('click', () => this.applySettings());
+        
+        console.log('✓ Settings modal setup complete');
+    }
+    
+    openSettingsModal() {
+        // Populate current values
+        if (this.currentAccuracy === 'exact') {
+            this.elements.settingsAccuracyExact.checked = true;
+        } else {
+            this.elements.settingsAccuracyFast.checked = true;
+        }
+        
+        // Light diameter - use current gesture's value or default
+        const currentDiameter = this.currentGestureData?.light_source?.diameter || 100;
+        const exactSettings = getExactSettings();
+        this.elements.settingsLightDiameter.value = exactSettings.lightDiameterOverride || currentDiameter;
+        
+        // Integration settings
+        this.elements.settingsGridRadial.value = exactSettings.integrationResolutionR;
+        this.elements.settingsGridAngular.value = exactSettings.integrationResolutionPhi;
+        
+        // Color threshold for drawing tube
+        this.elements.settingsColorThreshold.value = this.scene3d.colorThreshold || 4000;
+        
+        this.updateSettingsIntegrationVisibility();
+        this.updateIntegrationStats();
+        
+        this.elements.settingsModal.style.display = 'flex';
+    }
+    
+    closeSettingsModal() {
+        this.elements.settingsModal.style.display = 'none';
+    }
+    
+    updateSettingsIntegrationVisibility() {
+        const isExact = this.elements.settingsAccuracyExact.checked;
+        const integrationSection = this.elements.settingsIntegrationSection;
+        
+        if (integrationSection) {
+            integrationSection.style.display = isExact ? 'block' : 'none';
+        }
+        
+        // Show note about exact mode only for oriented model
+        if (this.elements.settingsAccuracyNote) {
+            this.elements.settingsAccuracyNote.style.display = isExact ? 'flex' : 'none';
+        }
+    }
+    
+    updateIntegrationStats() {
+        const nR = parseInt(this.elements.settingsGridRadial.value) || 20;
+        const nPhi = parseInt(this.elements.settingsGridAngular.value) || 20;
+        const totalPoints = nR * nPhi;
+        
+        this.elements.settingsIntegrationPoints.textContent = totalPoints.toLocaleString();
+        
+        // Estimate time based on resolution (rough heuristic: ~0.01ms per integration point)
+        const estimatedMs = totalPoints * 0.01;
+        let timeStr;
+        if (estimatedMs < 1) {
+            timeStr = '<1ms';
+        } else if (estimatedMs < 100) {
+            timeStr = `~${estimatedMs.toFixed(0)}ms`;
+        } else {
+            timeStr = `~${(estimatedMs / 1000).toFixed(1)}s`;
+        }
+        this.elements.settingsEstimatedTime.textContent = timeStr + ' per sample';
+    }
+    
+    resetSettingsToDefaults() {
+        // Reset to default values
+        this.elements.settingsAccuracyFast.checked = true;
+        this.elements.settingsLightDiameter.value = this.currentGestureData?.light_source?.diameter || 100;
+        this.elements.settingsGridRadial.value = DEFAULT_INTEGRATION_R;
+        this.elements.settingsGridAngular.value = DEFAULT_INTEGRATION_PHI;
+        this.elements.settingsColorThreshold.value = 4000;  // Default color threshold
+        
+        this.updateSettingsIntegrationVisibility();
+        this.updateIntegrationStats();
+        
+        console.log('⚙️ Settings reset to defaults');
+    }
+    
+    applySettings() {
+        // Get values from modal
+        const newAccuracy = this.elements.settingsAccuracyExact.checked ? 'exact' : 'fast';
+        const newDiameter = parseFloat(this.elements.settingsLightDiameter.value);
+        const newGridR = parseInt(this.elements.settingsGridRadial.value);
+        const newGridPhi = parseInt(this.elements.settingsGridAngular.value);
+        const newColorThreshold = parseInt(this.elements.settingsColorThreshold.value);
+        
+        // Validate
+        if (isNaN(newDiameter) || newDiameter <= 0) {
+            alert('Please enter a valid positive light source diameter.');
+            return;
+        }
+        if (isNaN(newGridR) || newGridR < 4 || isNaN(newGridPhi) || newGridPhi < 4) {
+            alert('Grid resolution must be at least 4.');
+            return;
+        }
+        if (isNaN(newColorThreshold) || newColorThreshold < 100) {
+            alert('Color threshold must be at least 100.');
+            return;
+        }
+        
+        // Update accuracy
+        const accuracyChanged = this.currentAccuracy !== newAccuracy;
+        this.currentAccuracy = newAccuracy;
+        
+        // Update exact simulator settings
+        updateExactSettings({
+            integrationResolutionR: newGridR,
+            integrationResolutionPhi: newGridPhi,
+            lightDiameterOverride: newDiameter
+        });
+        
+        // Update scene color threshold
+        this.scene3d.setColorThreshold(newColorThreshold);
+        
+        // Close modal
+        this.closeSettingsModal();
+        
+        // Recompute simulation with new settings
+        this.recomputeSimulation();
+        
+        console.log(`⚙️ Settings applied: accuracy=${newAccuracy}, diameter=${newDiameter}mm, grid=${newGridR}×${newGridPhi}, colorThreshold=${newColorThreshold}`);
+    }
 }
 
 // Initialize app when DOM is ready
 window.addEventListener('DOMContentLoaded', () => {
-    new SolarTrackDemo();
+    const app = new SolarTrackDemo();
+    // Expose app for debugging
+    window.solarTrackApp = app;
 });
 

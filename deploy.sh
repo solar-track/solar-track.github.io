@@ -50,3 +50,5 @@ echo "https://yourusername.github.io/solartrack-demo/"
 echo ""
 echo "Note: First deployment might take 2-3 minutes."
 
+
+

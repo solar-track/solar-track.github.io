@@ -171,6 +171,13 @@ export class PowerChart {
         this.chart.data.datasets[1].data = simPowerMicroW;
         
         // Hide real data if not available, in custom mode, or uploaded file
+        console.log('Chart visibility decision:', {
+            isCustomMode,
+            hasRealPower: !!realPower,
+            realPowerLength: realPower?.length,
+            willHide: isCustomMode || !realPower
+        });
+        
         if (isCustomMode || !realPower) {
             this.chart.data.datasets[0].hidden = true;
             if (isCustomMode) {
@@ -181,6 +188,7 @@ export class PowerChart {
         } else {
             this.chart.data.datasets[0].hidden = false;
             this.chart.data.datasets[1].label = 'Simulated';
+            console.log('✓ Real power curve will be VISIBLE');
             
             // Fade real data if requested
             if (fadeRealData) {

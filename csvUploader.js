@@ -106,7 +106,9 @@ export class CSVUploader {
             console.log('Extracted data:', {
                 positions: positions.length,
                 normals: normals.length,
-                realPower: realPower?.length,
+                realPower: realPower,
+                realPowerLength: realPower?.length,
+                realPowerSample: realPower ? realPower.slice(0, 5) : null,
                 timestamps: timestamps.length
             });
 
@@ -213,11 +215,16 @@ export class CSVUploader {
                     row.leap_palm_normal_z || 0
                 ];
                 // Calculate power from voltage and current (P = V * I)
-                if (row.v_dc !== null && row.v_dc !== undefined && 
-                    row.i_dc !== null && row.i_dc !== undefined) {
-                    power = row.v_dc * row.i_dc;
+                const v_dc = parseFloat(row.v_dc);
+                const i_dc = parseFloat(row.i_dc);
+                if (!isNaN(v_dc) && !isNaN(i_dc)) {
+                    power = v_dc * i_dc;
                 } else {
                     power = null;
+                }
+                // Log first few rows for debugging
+                if (i < 3) {
+                    console.log(`Row ${i} power: v_dc=${row.v_dc} (${v_dc}), i_dc=${row.i_dc} (${i_dc}), power=${power}`);
                 }
                 time = row.time || i * 0.01; // 100 Hz default
 
@@ -254,16 +261,21 @@ export class CSVUploader {
 
             positions.push(pos);
             normals.push(normal);
-            if (power !== null && !isNaN(power)) {
-                realPower.push(power);
-            }
+            // Always push power value - will be null if invalid/missing
+            realPower.push((power !== null && power !== undefined && !isNaN(power)) ? power : null);
             timestamps.push(time);
         }
 
+        // Count valid power values
+        const validPowerCount = realPower.filter(p => p !== null).length;
+        console.log(`Power extraction: ${validPowerCount}/${realPower.length} valid values`);
+
+        // Only return real power if ALL samples have power (for proper chart rendering)
+        // Otherwise return null - we can't plot partial data
         return {
             positions,
             normals,
-            realPower: realPower.length === positions.length ? realPower : null,
+            realPower: validPowerCount === realPower.length ? realPower : null,
             timestamps
         };
     }

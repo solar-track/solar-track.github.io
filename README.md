@@ -153,3 +153,5 @@ If you use this simulator in your research, please cite:
 - Chart.js for power comparison charts
 - Vite for fast development and building
 
+
+

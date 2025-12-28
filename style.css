@@ -6,7 +6,7 @@
 
 body {
     font-family: 'Arial', 'Helvetica', sans-serif;
-    background: #E0EFF9;
+    background: #D8CCE5;  /* Light purple/lavender to match theme */
     color: #333;
     min-height: 100vh;
 }
@@ -15,6 +15,7 @@ body {
     width: 100%;
     min-height: 100vh;
     padding: 20px;
+    background: #f7f1ff;
 }
 
 header {
@@ -46,6 +47,27 @@ header {
 .header-icon {
     height: 50px;
     width: auto;
+}
+
+.help-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: rgba(113, 85, 140, 0.1);
+    color: #71558C;
+    border-radius: 50%;
+    text-decoration: none;
+    font-size: 1.25rem;
+    margin-left: 12px;
+    transition: all 0.2s ease;
+}
+
+.help-link:hover {
+    background: #71558C;
+    color: white;
+    transform: scale(1.1);
 }
 
 .header-text {
@@ -224,6 +246,34 @@ select:hover {
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-5px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* Accuracy mode note */
+.accuracy-note {
+    margin-top: 8px;
+    padding: 8px 10px;
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 5px;
+    font-size: 12px;
+    color: #856404;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.accuracy-note i {
+    color: #856404;
+}
+
+/* Disabled radio option */
+.radio-group label.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.radio-group label.disabled:hover {
+    background: transparent;
 }
 
 .checkbox-group {
@@ -1061,19 +1111,34 @@ input[type="range"]::-moz-range-thumb {
     60%, 100% { content: '...'; }
 }
 
-/* Kappa Configuration Modal */
+/* Modal Styles */
 .modal {
     position: fixed;
     z-index: 2000;
     left: 0;
     top: 0;
+    right: 0;
+    bottom: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
+    display: none; /* Hidden by default */
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(4px);
+    overflow: auto;
+}
+
+/* Modal backdrop overlay */
+.modal::before {
+    content: '';
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: -1;
 }
 
 .modal-content {
@@ -1278,5 +1343,259 @@ input[type="range"]::-moz-range-thumb {
 
 .modal-footer .btn {
     min-width: 100px;
+}
+
+/* Settings Icon Button in Control Panel Header */
+.control-section h3 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.settings-icon-btn {
+    background: none;
+    border: none;
+    color: #7B68A6;
+    font-size: 1.1em;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.settings-icon-btn:hover {
+    background: rgba(123, 104, 166, 0.15);
+    transform: rotate(45deg);
+}
+
+.settings-icon-btn:active {
+    transform: rotate(90deg);
+}
+
+/* Settings Modal Specific Styles */
+.settings-modal-content {
+    max-width: 550px;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.settings-section {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.settings-section:last-child {
+    margin-bottom: 0;
+}
+
+.settings-section h4 {
+    font-size: 1em;
+    color: #4A3B5C;
+    margin: 0 0 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.settings-section h4 i {
+    color: #7B68A6;
+}
+
+.section-desc {
+    font-size: 0.85em;
+    color: #666;
+    margin: -8px 0 12px 0;
+}
+
+/* Settings Radio Group */
+.settings-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.settings-radio-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.settings-radio-label:hover {
+    border-color: #7B68A6;
+}
+
+.settings-radio-label input[type="radio"] {
+    margin-top: 3px;
+    accent-color: #7B68A6;
+}
+
+.settings-radio-label input[type="radio"]:checked + .radio-content strong {
+    color: #7B68A6;
+}
+
+.settings-radio-label:has(input:checked) {
+    border-color: #7B68A6;
+    background: rgba(123, 104, 166, 0.05);
+}
+
+.radio-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.radio-content strong {
+    font-size: 0.95em;
+    color: #333;
+}
+
+.radio-desc {
+    font-size: 0.8em;
+    color: #666;
+    line-height: 1.4;
+}
+
+/* Settings Input Rows */
+.settings-input-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.settings-input-row:last-child {
+    margin-bottom: 0;
+}
+
+.settings-input-row label {
+    flex: 1;
+    font-size: 0.9em;
+    color: #333;
+}
+
+.settings-input-row input[type="number"] {
+    width: 100px;
+    padding: 8px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.95em;
+    text-align: right;
+    transition: border-color 0.2s ease;
+}
+
+.settings-input-row input[type="number"]:focus {
+    outline: none;
+    border-color: #7B68A6;
+}
+
+.settings-input-row .input-hint {
+    font-size: 0.75em;
+    color: #888;
+    flex: 1;
+}
+
+/* Integration Stats */
+.integration-stats {
+    background: white;
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 12px;
+}
+
+.integration-stats p {
+    margin: 4px 0;
+    font-size: 0.85em;
+    color: #555;
+}
+
+.integration-stats strong {
+    color: #7B68A6;
+}
+
+/* Settings Note */
+.settings-note {
+    font-size: 0.8em;
+    color: #888;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.settings-note i {
+    color: #7B68A6;
+}
+
+/* Read-only Section */
+.settings-section-readonly {
+    background: #f0f0f0;
+    opacity: 0.9;
+}
+
+.readonly-values {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.readonly-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed #ddd;
+}
+
+.readonly-item:last-child {
+    border-bottom: none;
+}
+
+.readonly-label {
+    font-size: 0.85em;
+    color: #666;
+}
+
+.readonly-value {
+    font-size: 0.85em;
+    color: #333;
+    font-family: 'Courier New', monospace;
+    background: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+/* Settings Modal Footer */
+.settings-modal-content .modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.settings-modal-content .modal-footer .footer-right {
+    display: flex;
+    gap: 12px;
+}
+
+#settings-reset-btn {
+    color: #e74c3c;
+    border-color: #e74c3c;
+    background: transparent;
+}
+
+#settings-reset-btn:hover {
+    background: rgba(231, 76, 60, 0.1);
 }
 

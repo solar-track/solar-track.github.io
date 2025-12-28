@@ -22,6 +22,7 @@ export class Scene3D {
         this.trajectoryLine = null;
         this.trajectoryPoints = null;
         this.cometTail = null;
+        this.drawingTube = null;  // Tube that grows during play mode
         
         // Textures
         this.handTexture = null;
@@ -31,6 +32,11 @@ export class Scene3D {
         this.currentIndex = 0;
         this.positions = [];
         this.normals = [];
+        this.powerValues = [];  // Store power values for drawing tube coloring
+        this.isPlaying = false;
+        this.trajectoryVertexCount = 0;
+        this.lastDrawingIndex = 0;  // For throttling drawing tube updates
+        this.colorThreshold = 4000;  // Default: use colors below this, brown above for performance
         
         this.init();
     }
@@ -38,7 +44,7 @@ export class Scene3D {
     init() {
         // Scene
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0xf5f7fa);
+        this.scene.background = new THREE.Color(0xf5f7fa);  // Light grey for 3D scene
         
         // Camera
         this.camera = new THREE.PerspectiveCamera(
@@ -213,6 +219,7 @@ export class Scene3D {
     setTrajectory(positions, normals, powerValues) {
         this.positions = positions;
         this.normals = normals;
+        this.powerValues = powerValues || [];
         
         // Remove existing trajectory if any
         if (this.trajectoryLine) {
@@ -223,6 +230,10 @@ export class Scene3D {
         }
         if (this.cometTail) {
             this.scene.remove(this.cometTail);
+        }
+        if (this.drawingTube) {
+            this.scene.remove(this.drawingTube);
+            this.drawingTube = null;
         }
         
         // Create trajectory as thick tube for better visibility
@@ -284,7 +295,11 @@ export class Scene3D {
         }
         
         this.trajectoryLine = new THREE.Mesh(tubeGeometry, tubeMaterial);
+        this.trajectoryVertexCount = tubeGeometry.attributes.position.count;
         this.scene.add(this.trajectoryLine);
+        
+        // Show full trajectory initially (not playing)
+        this.showFullTrajectory();
         
         // Create comet tail as thick tube
         const tailGeometry = new THREE.BufferGeometry();
@@ -319,15 +334,207 @@ export class Scene3D {
         this.normalArrow.position.set(pos[0], pos[1], pos[2]);
         this.normalArrow.setDirection(normalVec);
         
-        // Update comet tail (show last 20 points)
-        const tailLength = Math.min(20, index + 1);
-        const tailStart = Math.max(0, index - tailLength + 1);
-        const tailPoints = [];
-        for (let i = tailStart; i <= index; i++) {
-            const p = this.positions[i];
-            tailPoints.push(new THREE.Vector3(p[0], p[1], p[2]));
+        // Update trajectory visualization
+        if (this.isPlaying) {
+            // During play: draw thick tube from start to current position
+            this.updateDrawingTube(index);
+            // Hide the thin comet tail
+            if (this.cometTail) {
+                this.cometTail.visible = false;
+            }
+        } else {
+            // When paused: show comet tail (last 20 points) as a trail
+            if (this.cometTail) {
+                this.cometTail.visible = true;
+                const tailPoints = [];
+                const tailLength = Math.min(20, index + 1);
+                const tailStart = Math.max(0, index - tailLength + 1);
+                for (let i = tailStart; i <= index; i++) {
+                    const p = this.positions[i];
+                    tailPoints.push(new THREE.Vector3(p[0], p[1], p[2]));
+                }
+                this.cometTail.geometry.setFromPoints(tailPoints);
+            }
         }
-        this.cometTail.geometry.setFromPoints(tailPoints);
+    }
+    
+    /**
+     * Update the drawing tube to show trajectory from start to current index
+     */
+    updateDrawingTube(index) {
+        // Need at least 3 points to create a tube
+        if (index < 3) {
+            if (this.drawingTube) {
+                this.drawingTube.visible = false;
+            }
+            return;
+        }
+        
+        // Check if animation has looped (index went back to start)
+        const hasLooped = this.lastDrawingIndex && index < this.lastDrawingIndex;
+        
+        // If animation looped, reset drawing state
+        if (hasLooped) {
+            // Remove old drawing tube from previous iteration
+            if (this.drawingTube) {
+                this.scene.remove(this.drawingTube);
+                if (this.drawingTube.geometry) this.drawingTube.geometry.dispose();
+                if (this.drawingTube.material) this.drawingTube.material.dispose();
+                this.drawingTube = null;
+            }
+            this.lastDrawingIndex = 0;
+        }
+        
+        // Only update every 3 frames for performance
+        if (this.lastDrawingIndex && index - this.lastDrawingIndex < 3) {
+            return;
+        }
+        this.lastDrawingIndex = index;
+        
+        // Remove old drawing tube before creating new one
+        if (this.drawingTube) {
+            this.scene.remove(this.drawingTube);
+            if (this.drawingTube.geometry) this.drawingTube.geometry.dispose();
+            if (this.drawingTube.material) this.drawingTube.material.dispose();
+            this.drawingTube = null;
+        }
+        
+        try {
+            // Create tube from start to current position
+            const points = [];
+            for (let i = 0; i <= index; i++) {
+                const p = this.positions[i];
+                if (p) {
+                    points.push(new THREE.Vector3(p[0], p[1], p[2]));
+                }
+            }
+            
+            if (points.length < 3) return;
+            
+            const curve = new THREE.CatmullRomCurve3(points);
+            const segments = Math.max(points.length * 2, 16);
+            const tubeGeometry = new THREE.TubeGeometry(curve, segments, 3, 8, false);
+            
+            // Color by power if total samples below threshold, otherwise use uniform brown for performance
+            // Check total samples (not current index) to decide upfront
+            let tubeMaterial;
+            const totalSamples = this.positions.length;
+            const useVertexColors = this.powerValues && this.powerValues.length > 0 && totalSamples < this.colorThreshold;
+            
+            if (useVertexColors) {
+                // Get power values for the drawn portion
+                const drawnPowerValues = this.powerValues.slice(0, index + 1);
+                const minPower = Math.min(...this.powerValues); // Use full range for consistent coloring
+                const maxPower = Math.max(...this.powerValues);
+                const range = maxPower - minPower;
+                
+                // Create vertex colors
+                const colors = [];
+                const positionAttribute = tubeGeometry.attributes.position;
+                for (let i = 0; i < positionAttribute.count; i++) {
+                    // Map vertex to nearest point in trajectory
+                    const vertexIndex = Math.floor(i / (positionAttribute.count / points.length));
+                    const idx = Math.min(vertexIndex, drawnPowerValues.length - 1);
+                    const normalized = range > 0 ? (drawnPowerValues[idx] - minPower) / range : 0;
+                    
+                    // Copper colormap: black (0,0,0) -> brown (#603913) -> orange (#F7941D)
+                    const color = new THREE.Color();
+                    if (normalized < 0.5) {
+                        const t = normalized * 2;
+                        color.setRGB(0.376 * t, 0.224 * t, 0.075 * t);
+                    } else {
+                        const t = (normalized - 0.5) * 2;
+                        color.setRGB(
+                            0.376 + (0.969 - 0.376) * t,
+                            0.224 + (0.580 - 0.224) * t,
+                            0.075 + (0.114 - 0.075) * t
+                        );
+                    }
+                    colors.push(color.r, color.g, color.b);
+                }
+                
+                tubeGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+                tubeMaterial = new THREE.MeshBasicMaterial({
+                    vertexColors: true,
+                    transparent: true,
+                    opacity: 0.9
+                });
+            } else {
+                // Use uniform brown color (above threshold or no power values)
+                tubeMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x603913,
+                    transparent: true,
+                    opacity: 0.9
+                });
+            }
+            
+            this.drawingTube = new THREE.Mesh(tubeGeometry, tubeMaterial);
+            this.drawingTube.visible = true;
+            this.scene.add(this.drawingTube);
+        } catch (err) {
+            console.error('Error creating drawing tube:', err);
+        }
+    }
+    
+    /**
+     * Set play state - controls trajectory drawing behavior
+     */
+    setPlayState(isPlaying) {
+        console.warn(`🎬 setPlayState called: isPlaying=${isPlaying}, hasTrajectoryLine=${!!this.trajectoryLine}`);
+        this.isPlaying = isPlaying;
+        
+        if (isPlaying) {
+            // Reset drawing index when starting
+            this.lastDrawingIndex = 0;
+            
+            // When starting to play, hide the main trajectory (drawing tube will be shown instead)
+            if (this.trajectoryLine) {
+                this.trajectoryLine.visible = false;
+                console.warn(`🎬 Trajectory hidden: visible=${this.trajectoryLine.visible}, material.visible=${this.trajectoryLine.material?.visible}`);
+            }
+            // Also hide the comet tail initially
+            if (this.cometTail) {
+                this.cometTail.visible = false;
+            }
+        } else {
+            // When paused, show full trajectory and hide drawing tube
+            this.showFullTrajectory();
+        }
+    }
+    
+    /**
+     * Show the full trajectory (used when paused/reset)
+     */
+    showFullTrajectory() {
+        if (this.trajectoryLine) {
+            this.trajectoryLine.visible = true;
+            this.trajectoryLine.material.visible = true;
+            console.log(`🎬 Trajectory shown: visible=${this.trajectoryLine.visible}`);
+        }
+        // Hide the drawing tube when showing full trajectory
+        if (this.drawingTube) {
+            this.drawingTube.visible = false;
+        }
+        // Show the comet tail
+        if (this.cometTail) {
+            this.cometTail.visible = true;
+        }
+    }
+    
+    /**
+     * Reset trajectory to show full path
+     */
+    resetTrajectory() {
+        this.isPlaying = false;
+        this.showFullTrajectory();
+    }
+    
+    /**
+     * Set the color threshold for drawing tube
+     * Below threshold: power-colored, Above: uniform brown for performance
+     */
+    setColorThreshold(threshold) {
+        this.colorThreshold = threshold;
     }
     
     updateLightPosition(position) {

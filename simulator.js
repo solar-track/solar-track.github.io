@@ -11,7 +11,7 @@
 // Physical constants
 export const CONSTANTS = {
     SOURCE_CENTER: [-159.81, 868.82, 168.23],  // mm - Light source position
-    SOURCE_DIAMETER: 200.0,  // mm - Light source diameter
+    SOURCE_DIAMETER: 100.0,  // mm - Light source diameter (default)
     SAMPLING_RATE: 100,  // Hz - Data collection rate
 };
 
