@@ -279,23 +279,14 @@ class SolarTrackDemo {
     }
     
     setupHeaderButtons() {
-        const codeBtn = document.getElementById('code-btn');
+        // Paper button - shows placeholder until paper URL is set
         const paperBtn = document.getElementById('paper-btn');
-        
-        // Placeholder URLs - update these with actual links
-        codeBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            // TODO: Update with actual GitHub/dataset URL
-            alert('Code & Dataset link will be added here.\nUpdate the URL in main.js setupHeaderButtons()');
-            // window.open('https://github.com/yourusername/solartrack', '_blank');
-        });
-        
-        paperBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            // TODO: Update with actual paper URL
-            alert('Paper link will be added here.\nUpdate the URL in main.js setupHeaderButtons()');
-            // window.open('https://arxiv.org/abs/yourpaper', '_blank');
-        });
+        if (paperBtn && paperBtn.getAttribute('href') === '#') {
+            paperBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                alert('Paper link coming soon!\nThe camera-ready version will be linked here.');
+            });
+        }
     }
     
     setupTooltips() {

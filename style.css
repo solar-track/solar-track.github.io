@@ -26,6 +26,9 @@ header {
     border-radius: 0;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 .header-content {
@@ -49,22 +52,27 @@ header {
     width: auto;
 }
 
-.help-link {
+.header-icons {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.header-icon-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     background: rgba(113, 85, 140, 0.1);
     color: #71558C;
     border-radius: 50%;
     text-decoration: none;
-    font-size: 1.25rem;
-    margin-left: 12px;
+    font-size: 1.3rem;
     transition: all 0.2s ease;
 }
 
-.help-link:hover {
+.header-icon-btn:hover {
     background: #71558C;
     color: white;
     transform: scale(1.1);
