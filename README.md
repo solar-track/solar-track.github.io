@@ -11,6 +11,16 @@ npm run dev
 
 Open http://localhost:3000 in your browser.
 
+## Testing
+
+Run automated tests to validate the radiometric models:
+
+```bash
+npm test
+```
+
+This runs 20 test cases (5 gestures × 4 model configurations) against precomputed expected outputs. See [Testing Guide](public/test.html) for details.
+
 ## Features
 
 - Two physics-based radiometric models (Parallel Disk and Orientation Aware)

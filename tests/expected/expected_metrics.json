@@ -1,0 +1,392 @@
+{
+  "Circle": {
+    "parallel_default": {
+      "samples": 2667,
+      "kappa": 0.0028833587706566877,
+      "metrics": {
+        "rmse_uW": 44.85198339261604,
+        "r2": 0.41497659792292385,
+        "pearson": 0.75951363046921
+      },
+      "config": {
+        "name": "parallel_default",
+        "model": "parallel",
+        "lightPos": [
+          -159.81,
+          868.82,
+          168.23
+        ],
+        "diameter": 100
+      }
+    },
+    "orientation_approx_default": {
+      "samples": 2667,
+      "kappa": 0.004554657495323892,
+      "metrics": {
+        "rmse_uW": 38.98888147032445,
+        "r2": 0.5579295496604686,
+        "pearson": 0.8281705203434823
+      },
+      "config": {
+        "name": "orientation_approx_default",
+        "model": "orientation_approx",
+        "lightPos": [
+          -159.81,
+          868.82,
+          168.23
+        ],
+        "diameter": 100
+      }
+    },
+    "orientation_exact_default": {
+      "samples": 2667,
+      "kappa": 0.004018336217741817,
+      "metrics": {
+        "rmse_uW": 41.903768625245974,
+        "r2": 0.48935850852442864,
+        "pearson": 0.7962568176910392
+      },
+      "config": {
+        "name": "orientation_exact_default",
+        "model": "orientation_exact",
+        "lightPos": [
+          -159.81,
+          868.82,
+          168.23
+        ],
+        "diameter": 100
+      }
+    },
+    "parallel_centered": {
+      "samples": 2667,
+      "kappa": 0.006756756833883804,
+      "metrics": {
+        "rmse_uW": 57.12939403958614,
+        "r2": 0.05086242043596434,
+        "pearson": 0.23899392313847184
+      },
+      "config": {
+        "name": "parallel_centered",
+        "model": "parallel",
+        "lightPos": [
+          0,
+          800,
+          0
+        ],
+        "diameter": 100
+      }
+    }
+  },
+  "One": {
+    "parallel_default": {
+      "samples": 1797,
+      "kappa": 0.0036542562901569586,
+      "metrics": {
+        "rmse_uW": 11.64764950721257,
+        "r2": 0.7492914778232258,
+        "pearson": 0.9226525864080007
+      },
+      "config": {
+        "name": "parallel_default",
+        "model": "parallel",
+        "lightPos": [
+          -159.81,
+          868.82,
+          168.23
+        ],
+        "diameter": 100
+      }
+    },
+    "orientation_approx_default": {
+      "samples": 1797,
+      "kappa": 0.007442630466178879,
+      "metrics": {
+        "rmse_uW": 16.35863926111868,
+        "r2": 0.5054765840066757,
+        "pearson": 0.7309767970922981
+      },
+      "config": {
+        "name": "orientation_approx_default",
+        "model": "orientation_approx",
+        "lightPos": [
+          -159.81,
+          868.82,
+          168.23
+        ],
+        "diameter": 100
+      }
+    },
+    "orientation_exact_default": {
+      "samples": 1797,
+      "kappa": 0.00618971818514957,
+      "metrics": {
+        "rmse_uW": 12.085589506650285,
+        "r2": 0.7300842744010938,
+        "pearson": 0.8688770670716082
+      },
+      "config": {
+        "name": "orientation_exact_default",
+        "model": "orientation_exact",
+        "lightPos": [
+          -159.81,
+          868.82,
+          168.23
+        ],
+        "diameter": 100
+      }
+    },
+    "parallel_centered": {
+      "samples": 1797,
+      "kappa": 0.0024666231556455995,
+      "metrics": {
+        "rmse_uW": 19.43961316921787,
+        "r2": 0.301658668294601,
+        "pearson": 0.7937834457093772
+      },
+      "config": {
+        "name": "parallel_centered",
+        "model": "parallel",
+        "lightPos": [
+          0,
+          800,
+          0
+        ],
+        "diameter": 100
+      }
+    }
+  },
+  "Three": {
+    "parallel_default": {
+      "samples": 4051,
+      "kappa": 0.004426437852773613,
+      "metrics": {
+        "rmse_uW": 49.06260168121938,
+        "r2": 0.5804781106808583,
+        "pearson": 0.7886742042763536
+      },
+      "config": {
+        "name": "parallel_default",
+        "model": "parallel",
+        "lightPos": [
+          -159.81,
+          868.82,
+          168.23
+        ],
+        "diameter": 100
+      }
+    },
+    "orientation_approx_default": {
+      "samples": 4051,
+      "kappa": 0.005202518042724121,
+      "metrics": {
+        "rmse_uW": 44.56344527885206,
+        "r2": 0.6538925109524188,
+        "pearson": 0.8336942459833611
+      },
+      "config": {
+        "name": "orientation_approx_default",
+        "model": "orientation_approx",
+        "lightPos": [
+          -159.81,
+          868.82,
+          168.23
+        ],
+        "diameter": 100
+      }
+    },
+    "orientation_exact_default": {
+      "samples": 4051,
+      "kappa": 0.004946252068598079,
+      "metrics": {
+        "rmse_uW": 44.57807829809011,
+        "r2": 0.6536651753400554,
+        "pearson": 0.8312500259818173
+      },
+      "config": {
+        "name": "orientation_exact_default",
+        "model": "orientation_exact",
+        "lightPos": [
+          -159.81,
+          868.82,
+          168.23
+        ],
+        "diameter": 100
+      }
+    },
+    "parallel_centered": {
+      "samples": 4051,
+      "kappa": 0.0037697191039940724,
+      "metrics": {
+        "rmse_uW": 82.82110105481537,
+        "r2": -0.19546117833071874,
+        "pearson": 0.16932573343439836
+      },
+      "config": {
+        "name": "parallel_centered",
+        "model": "parallel",
+        "lightPos": [
+          0,
+          800,
+          0
+        ],
+        "diameter": 100
+      }
+    }
+  },
+  "Triangle": {
+    "parallel_default": {
+      "samples": 2753,
+      "kappa": 0.0028613796311076334,
+      "metrics": {
+        "rmse_uW": 25.409081725475602,
+        "r2": 0.5544991985243856,
+        "pearson": 0.8299063836350467
+      },
+      "config": {
+        "name": "parallel_default",
+        "model": "parallel",
+        "lightPos": [
+          -159.81,
+          868.82,
+          168.23
+        ],
+        "diameter": 100
+      }
+    },
+    "orientation_approx_default": {
+      "samples": 2753,
+      "kappa": 0.004598595565475547,
+      "metrics": {
+        "rmse_uW": 23.520246922433433,
+        "r2": 0.6182717484867943,
+        "pearson": 0.8375623935237221
+      },
+      "config": {
+        "name": "orientation_approx_default",
+        "model": "orientation_approx",
+        "lightPos": [
+          -159.81,
+          868.82,
+          168.23
+        ],
+        "diameter": 100
+      }
+    },
+    "orientation_exact_default": {
+      "samples": 2753,
+      "kappa": 0.0036972740286950025,
+      "metrics": {
+        "rmse_uW": 24.08585530794172,
+        "r2": 0.5996916071234932,
+        "pearson": 0.8390724771345096
+      },
+      "config": {
+        "name": "orientation_exact_default",
+        "model": "orientation_exact",
+        "lightPos": [
+          -159.81,
+          868.82,
+          168.23
+        ],
+        "diameter": 100
+      }
+    },
+    "parallel_centered": {
+      "samples": 2753,
+      "kappa": 0.0025759588245325717,
+      "metrics": {
+        "rmse_uW": 34.2332446788895,
+        "r2": 0.19133866607472672,
+        "pearson": 0.5923681434012368
+      },
+      "config": {
+        "name": "parallel_centered",
+        "model": "parallel",
+        "lightPos": [
+          0,
+          800,
+          0
+        ],
+        "diameter": 100
+      }
+    }
+  },
+  "Two": {
+    "parallel_default": {
+      "samples": 3379,
+      "kappa": 0.004350378867858864,
+      "metrics": {
+        "rmse_uW": 34.098961995918366,
+        "r2": 0.7418594128684806,
+        "pearson": 0.875540844834918
+      },
+      "config": {
+        "name": "parallel_default",
+        "model": "parallel",
+        "lightPos": [
+          -159.81,
+          868.82,
+          168.23
+        ],
+        "diameter": 100
+      }
+    },
+    "orientation_approx_default": {
+      "samples": 3379,
+      "kappa": 0.005076406960488568,
+      "metrics": {
+        "rmse_uW": 32.45125819999106,
+        "r2": 0.7662040112768698,
+        "pearson": 0.8924236638854829
+      },
+      "config": {
+        "name": "orientation_approx_default",
+        "model": "orientation_approx",
+        "lightPos": [
+          -159.81,
+          868.82,
+          168.23
+        ],
+        "diameter": 100
+      }
+    },
+    "orientation_exact_default": {
+      "samples": 3379,
+      "kappa": 0.004737421978449475,
+      "metrics": {
+        "rmse_uW": 32.77759791144296,
+        "r2": 0.7614781206807684,
+        "pearson": 0.8874050495136235
+      },
+      "config": {
+        "name": "orientation_exact_default",
+        "model": "orientation_exact",
+        "lightPos": [
+          -159.81,
+          868.82,
+          168.23
+        ],
+        "diameter": 100
+      }
+    },
+    "parallel_centered": {
+      "samples": 3379,
+      "kappa": 0.003714047619435947,
+      "metrics": {
+        "rmse_uW": 67.61157618362107,
+        "r2": -0.014883277820653795,
+        "pearson": 0.3071385153212682
+      },
+      "config": {
+        "name": "parallel_centered",
+        "model": "parallel",
+        "lightPos": [
+          0,
+          800,
+          0
+        ],
+        "diameter": 100
+      }
+    }
+  }
+}

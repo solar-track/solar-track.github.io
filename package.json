@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && gh-pages -d dist"
+    "deploy": "npm run build && gh-pages -d dist",
+    "test": "node tests/validate.js",
+    "test:generate": "node tests/generate_expected.js"
   },
   "dependencies": {
     "chart.js": "^4.4.1",
@@ -15,6 +17,8 @@
     "three": "^0.160.0"
   },
   "devDependencies": {
+    "csv-parse": "^5.5.3",
+    "csv-stringify": "^6.4.5",
     "gh-pages": "^6.1.1",
     "vite": "^5.0.11"
   }

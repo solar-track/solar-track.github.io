@@ -43,6 +43,7 @@
             <nav class="help-nav">
                 <ul>
                     <li><a href="#overview" class="nav-link active"><i class="fas fa-clipboard-check"></i> Overview</a></li>
+                    <li><a href="#automated-tests" class="nav-link"><i class="fas fa-robot"></i> Automated Tests</a></li>
                     <li><a href="#quick-validation" class="nav-link"><i class="fas fa-bolt"></i> Quick Validation</a></li>
                     <li><a href="#model-test" class="nav-link"><i class="fas fa-balance-scale"></i> Model Comparison</a></li>
                     <li><a href="#csv-test" class="nav-link"><i class="fas fa-file-csv"></i> CSV Upload</a></li>
@@ -78,6 +79,98 @@
                         <li>Modern browser (Chrome, Firefox, Safari, Edge)</li>
                         <li>Terminal access</li>
                     </ul>
+                </section>
+
+                <!-- Automated Tests -->
+                <section id="automated-tests" class="help-section">
+                    <h2><i class="fas fa-robot"></i> Automated Tests</h2>
+                    
+                    <p class="lead">
+                        Run the automated test suite to verify that the radiometric models produce 
+                        correct results against precomputed expected outputs.
+                    </p>
+
+                    <div class="info-box">
+                        <h4><i class="fas fa-check-double"></i> What is Tested</h4>
+                        <ul>
+                            <li><strong>20 test cases:</strong> 5 gestures × 4 model configurations</li>
+                            <li><strong>Parallel Disk model:</strong> View factor calculation (Eq. A.5)</li>
+                            <li><strong>Orientation Aware (Approximate):</strong> Cosine-corrected view factor</li>
+                            <li><strong>Orientation Aware (Exact):</strong> Full integration (Eq. A.4)</li>
+                            <li><strong>Metrics validated:</strong> RMSE, R², Pearson correlation (ρ)</li>
+                        </ul>
+                    </div>
+
+                    <h3>Run Automated Tests</h3>
+                    <div class="code-block">
+                        <code>npm test</code>
+                    </div>
+
+                    <h3>Expected Output</h3>
+                    <div class="code-block" style="font-size: 0.85rem;">
+                        <pre>╔══════════════════════════════════════════════════════════════╗
+║           SolarTrack Automated Test Validator                ║
+╚══════════════════════════════════════════════════════════════╝
+
+Testing 5 gestures...
+
+📁 Circle
+   ✅ parallel_default
+   ✅ orientation_approx_default
+   ✅ orientation_exact_default
+   ✅ parallel_centered
+
+... (more gestures) ...
+
+📊 SUMMARY
+   Total tests: 20
+   Passed: 20 ✅
+   Failed: 0 ❌
+
+🎉 All tests passed!</pre>
+                    </div>
+
+                    <h3>Test Data Structure</h3>
+                    <table class="help-table">
+                        <thead>
+                            <tr>
+                                <th>Path</th>
+                                <th>Contents</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>tests/data/</code></td>
+                                <td>Input CSV files (motion capture trajectories)</td>
+                            </tr>
+                            <tr>
+                                <td><code>tests/expected/</code></td>
+                                <td>Precomputed expected outputs per model</td>
+                            </tr>
+                            <tr>
+                                <td><code>tests/expected_metrics.json</code></td>
+                                <td>Summary of expected RMSE, R², ρ values</td>
+                            </tr>
+                            <tr>
+                                <td><code>tests/validate.js</code></td>
+                                <td>Validation script (compares actual vs expected)</td>
+                            </tr>
+                            <tr>
+                                <td><code>tests/generate_expected.js</code></td>
+                                <td>Script to regenerate expected outputs</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Regenerate Expected Outputs</h3>
+                    <p>If you modify the model implementation, regenerate expected outputs:</p>
+                    <div class="code-block">
+                        <code>npm run test:generate</code>
+                    </div>
+                    <p class="note">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Only regenerate if you intentionally changed the model behavior.
+                    </p>
                 </section>
 
                 <!-- Quick Validation -->
