@@ -1,6 +1,18 @@
 /**
- * CSV Uploader - Client-side CSV file processing for motion capture data
- * Supports Leap Motion and custom format CSVs
+ * SolarTrack Radiometric Simulator - CSV Uploader
+ * 
+ * Client-side CSV processing for motion capture data.
+ * Supports Leap Motion and custom format CSVs.
+ * 
+ * Reference:
+ *   Ghalwash, Y., Khamis, A., Sandhu, M., Khalifa, S., & Jurdak, R. (2026).
+ *   "SolarTrack: Exploring the Continuous Tracking Capabilities of Wearable
+ *   Solar Harvesters". In Proc. IEEE PerCom 2026.
+ * 
+ * Correspondence:
+ *   Abdelwahed Khamis - https://abdelwahed.github.io
+ * 
+ * License: MIT
  */
 
 import Papa from 'papaparse';

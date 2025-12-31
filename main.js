@@ -1,8 +1,18 @@
 /**
- * main.js
+ * SolarTrack Radiometric Simulator - Main Application
  * 
- * Main application entry point.
- * Coordinates all modules and handles user interactions.
+ * Interactive tool for modeling power harvesting from wearable solar cells
+ * under controlled lighting conditions.
+ * 
+ * Reference:
+ *   Ghalwash, Y., Khamis, A., Sandhu, M., Khalifa, S., & Jurdak, R. (2026).
+ *   "SolarTrack: Exploring the Continuous Tracking Capabilities of Wearable
+ *   Solar Harvesters". In Proc. IEEE PerCom 2026.
+ * 
+ * Correspondence:
+ *   Abdelwahed Khamis - https://abdelwahed.github.io
+ * 
+ * License: MIT
  */
 
 import { Scene3D } from './scene3d.js';

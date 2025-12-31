@@ -1,7 +1,17 @@
 /**
- * scene3d.js
+ * SolarTrack Radiometric Simulator - 3D Visualization
  * 
  * Three.js visualization for hand trajectory and light source.
+ * 
+ * Reference:
+ *   Ghalwash, Y., Khamis, A., Sandhu, M., Khalifa, S., & Jurdak, R. (2026).
+ *   "SolarTrack: Exploring the Continuous Tracking Capabilities of Wearable
+ *   Solar Harvesters". In Proc. IEEE PerCom 2026.
+ * 
+ * Correspondence:
+ *   Abdelwahed Khamis - https://abdelwahed.github.io
+ * 
+ * License: MIT
  */
 
 import * as THREE from 'three';

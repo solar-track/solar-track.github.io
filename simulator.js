@@ -1,11 +1,18 @@
 /**
- * simulator.js
+ * SolarTrack Radiometric Simulator - View Factor Calculation
  * 
- * JavaScript port of the Python radiometric simulator.
- * Implements view factor calculation and both parallel and oriented disk models.
+ * Implements the parallel disk view factor model (Eq. A.5) and approximate
+ * orientation-aware model with cosine correction.
  * 
- * References Python code from:
- * - classification/publication_visuals/five_panel_figure.py
+ * Reference:
+ *   Ghalwash, Y., Khamis, A., Sandhu, M., Khalifa, S., & Jurdak, R. (2026).
+ *   "SolarTrack: Exploring the Continuous Tracking Capabilities of Wearable
+ *   Solar Harvesters". In Proc. IEEE PerCom 2026.
+ * 
+ * Correspondence:
+ *   Abdelwahed Khamis - https://abdelwahed.github.io
+ * 
+ * License: MIT
  */
 
 // Physical constants

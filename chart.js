@@ -1,7 +1,17 @@
 /**
- * chart.js
+ * SolarTrack Radiometric Simulator - Power Chart
  * 
- * Chart.js visualization for power comparison.
+ * Chart.js visualization for real vs simulated power comparison.
+ * 
+ * Reference:
+ *   Ghalwash, Y., Khamis, A., Sandhu, M., Khalifa, S., & Jurdak, R. (2026).
+ *   "SolarTrack: Exploring the Continuous Tracking Capabilities of Wearable
+ *   Solar Harvesters". In Proc. IEEE PerCom 2026.
+ * 
+ * Correspondence:
+ *   Abdelwahed Khamis - https://abdelwahed.github.io
+ * 
+ * License: MIT
  */
 
 import { Chart, registerables } from 'chart.js';

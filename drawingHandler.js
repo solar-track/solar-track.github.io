@@ -1,7 +1,17 @@
 /**
- * drawingHandler.js
+ * SolarTrack Radiometric Simulator - Drawing Handler
  * 
  * Handles custom trajectory drawing functionality.
+ * 
+ * Reference:
+ *   Ghalwash, Y., Khamis, A., Sandhu, M., Khalifa, S., & Jurdak, R. (2026).
+ *   "SolarTrack: Exploring the Continuous Tracking Capabilities of Wearable
+ *   Solar Harvesters". In Proc. IEEE PerCom 2026.
+ * 
+ * Correspondence:
+ *   Abdelwahed Khamis - https://abdelwahed.github.io
+ * 
+ * License: MIT
  */
 
 export class DrawingHandler {

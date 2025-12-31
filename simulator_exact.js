@@ -1,12 +1,20 @@
 /**
- * Exact Radiometric Model Implementation (Eq. A.4)
+ * SolarTrack Radiometric Simulator - Exact View Factor (Eq. A.4)
  * 
- * This implements the exact orientation-aware view factor calculation
- * by integrating over the entire lamp disk surface, computing the proper
- * radiometric kernel for each differential element.
+ * Implements exact orientation-aware view factor calculation by integrating
+ * over the lamp disk surface with the full radiometric kernel.
  * 
- * Reference: Equation A.4 from the paper
  * F = (1/π) ∬ ((R·n_e)(-R·n_c)) / ||R||^4  r' dφ dr'
+ * 
+ * Reference:
+ *   Ghalwash, Y., Khamis, A., Sandhu, M., Khalifa, S., & Jurdak, R. (2026).
+ *   "SolarTrack: Exploring the Continuous Tracking Capabilities of Wearable
+ *   Solar Harvesters". In Proc. IEEE PerCom 2026.
+ * 
+ * Correspondence:
+ *   Abdelwahed Khamis - https://abdelwahed.github.io
+ * 
+ * License: MIT
  */
 
 // Constants
