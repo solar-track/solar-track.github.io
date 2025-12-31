@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SolarTrack - Testing Guide</title>
+    <link rel="stylesheet" href="/help.css">
+    <!-- KaTeX for equations -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false}
+            ]
+        });"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="help-container">
+        <!-- Header -->
+        <header class="help-header">
+            <div class="header-left">
+                <img src="/assets/solartrack_icon.svg" alt="SolarTrack" class="help-logo">
+                <h1>Testing Guide</h1>
+            </div>
+            <div class="header-right">
+                <a href="help.html" class="back-btn">
+                    <i class="fas fa-book"></i>
+                    Documentation
+                </a>
+                <a href="index.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Simulator
+                </a>
+            </div>
+        </header>
+
+        <div class="help-content">
+            <!-- Navigation Sidebar -->
+            <nav class="help-nav">
+                <ul>
+                    <li><a href="#overview" class="nav-link active"><i class="fas fa-clipboard-check"></i> Overview</a></li>
+                    <li><a href="#quick-validation" class="nav-link"><i class="fas fa-bolt"></i> Quick Validation</a></li>
+                    <li><a href="#model-test" class="nav-link"><i class="fas fa-balance-scale"></i> Model Comparison</a></li>
+                    <li><a href="#csv-test" class="nav-link"><i class="fas fa-file-csv"></i> CSV Upload</a></li>
+                    <li><a href="#expected-results" class="nav-link"><i class="fas fa-chart-bar"></i> Expected Results</a></li>
+                    <li><a href="#troubleshooting" class="nav-link"><i class="fas fa-wrench"></i> Troubleshooting</a></li>
+                </ul>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="help-main">
+                <!-- Overview -->
+                <section id="overview" class="help-section">
+                    <h2><i class="fas fa-clipboard-check"></i> Overview</h2>
+                    
+                    <p class="lead">
+                        This guide helps you verify that the SolarTrack Radiometric Simulator is working correctly.
+                        Follow the tests below to validate the core functionality.
+                    </p>
+
+                    <div class="info-box">
+                        <h4><i class="fas fa-info-circle"></i> What These Tests Validate</h4>
+                        <ul>
+                            <li><strong>3D Visualization:</strong> Trajectories render correctly in the scene</li>
+                            <li><strong>Radiometric Models:</strong> Power calculations match expected physics</li>
+                            <li><strong>Animation:</strong> Playback and real-time updates work</li>
+                            <li><strong>Data I/O:</strong> CSV import and export function properly</li>
+                        </ul>
+                    </div>
+
+                    <h3>Prerequisites</h3>
+                    <ul>
+                        <li>Node.js v16 or higher</li>
+                        <li>Modern browser (Chrome, Firefox, Safari, Edge)</li>
+                        <li>Terminal access</li>
+                    </ul>
+                </section>
+
+                <!-- Quick Validation -->
+                <section id="quick-validation" class="help-section">
+                    <h2><i class="fas fa-bolt"></i> Quick Validation (2 minutes)</h2>
+                    
+                    <p>Perform these checks to verify basic functionality:</p>
+
+                    <div class="steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>Start the Simulator</h4>
+                                <div class="code-block">
+                                    <code>npm install && npm run dev</code>
+                                </div>
+                                <p>Open <strong>http://localhost:3000</strong> in your browser.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>Verify Initial State</h4>
+                                <ul class="checklist">
+                                    <li><i class="fas fa-check-circle"></i> Circle trajectory visible in 3D view</li>
+                                    <li><i class="fas fa-check-circle"></i> Light source (yellow disk) visible above trajectory</li>
+                                    <li><i class="fas fa-check-circle"></i> Power chart shows two curves: Real (brown) and Simulated (orange)</li>
+                                    <li><i class="fas fa-check-circle"></i> Metrics displayed: RMSE, R², ρ</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>Test Animation</h4>
+                                <p>Click <strong>▶ Play</strong> button.</p>
+                                <ul class="checklist">
+                                    <li><i class="fas fa-check-circle"></i> Hand icon moves along the trajectory</li>
+                                    <li><i class="fas fa-check-circle"></i> Red dashed line in chart follows playback position</li>
+                                    <li><i class="fas fa-check-circle"></i> Current State panel updates (a, H, θ, Power values change)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h4>Test Light Position</h4>
+                                <p>Adjust the <strong>Y (mm)</strong> slider in the Controls panel.</p>
+                                <ul class="checklist">
+                                    <li><i class="fas fa-check-circle"></i> Light source moves in 3D view</li>
+                                    <li><i class="fas fa-check-circle"></i> Simulated power curve updates immediately</li>
+                                    <li><i class="fas fa-check-circle"></i> RMSE value changes</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Model Comparison Test -->
+                <section id="model-test" class="help-section">
+                    <h2><i class="fas fa-balance-scale"></i> Model Comparison Test</h2>
+                    
+                    <p>
+                        This test validates the difference between the <strong>Parallel Disk</strong> and 
+                        <strong>Orientation Aware</strong> radiometric models.
+                    </p>
+
+                    <div class="info-box">
+                        <h4><i class="fas fa-lightbulb"></i> Best Test Case: Triangle Trajectory</h4>
+                        <p>
+                            The <strong>Triangle</strong> gesture shows the clearest difference between models 
+                            because the hand tilts significantly during the motion.
+                        </p>
+                    </div>
+
+                    <h3>Test Steps</h3>
+                    <ol>
+                        <li>Select <strong>Triangle</strong> from the Trajectory dropdown</li>
+                        <li>Ensure <strong>Orientation Aware</strong> model is selected</li>
+                        <li>Observe the power curve around the peak — note the nuanced shape that closely follows the real power</li>
+                        <li>Switch to <strong>Parallel Disk</strong> model</li>
+                        <li>Observe that the curve around the peak is now <strong>smoother</strong> and less accurate</li>
+                    </ol>
+
+                    <h3>Expected Behavior</h3>
+                    <table class="help-table">
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Peak Shape</th>
+                                <th>Fit Quality</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Orientation Aware</strong></td>
+                                <td>Nuanced, follows real curve closely</td>
+                                <td>Higher R², lower RMSE</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Parallel Disk</strong></td>
+                                <td>Smoothed, misses tilt effects</td>
+                                <td>Lower R², higher RMSE</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <p class="model-note">
+                        <strong>Why?</strong> The Parallel Disk model assumes the cell always faces upward, 
+                        ignoring hand tilt. The Orientation Aware model uses the actual cell normal vector 
+                        and applies Lambert's cosine law, capturing how tilt affects power reception.
+                    </p>
+                </section>
+
+                <!-- CSV Upload Test -->
+                <section id="csv-test" class="help-section">
+                    <h2><i class="fas fa-file-csv"></i> CSV Upload Test</h2>
+                    
+                    <p>Verify that custom motion capture data can be loaded.</p>
+
+                    <h3>Test Steps</h3>
+                    <ol>
+                        <li>Click <strong>Upload Motion Capture</strong> button</li>
+                        <li>Select a CSV file with position data (see format in <a href="help.html#csv-format">Documentation</a>)</li>
+                        <li>Wait for the upload progress bar to complete</li>
+                    </ol>
+
+                    <h3>Expected Results</h3>
+                    <ul class="checklist">
+                        <li><i class="fas fa-check-circle"></i> Trajectory updates in 3D view</li>
+                        <li><i class="fas fa-check-circle"></i> Power chart recalculates with new data</li>
+                        <li><i class="fas fa-check-circle"></i> If CSV contains power data, Real curve updates</li>
+                        <li><i class="fas fa-check-circle"></i> Status message shows sample count</li>
+                    </ul>
+
+                    <h3>Export Test</h3>
+                    <ol>
+                        <li>Click the <strong>Download</strong> button (bottom-right of chart)</li>
+                        <li>Verify CSV file is downloaded</li>
+                        <li>Open the file — should contain timestamp, simulated_power_W, a_mm, H_mm columns</li>
+                    </ol>
+                </section>
+
+                <!-- Expected Results -->
+                <section id="expected-results" class="help-section">
+                    <h2><i class="fas fa-chart-bar"></i> Expected Results</h2>
+                    
+                    <p>Reference metrics for the default configuration (Orientation Aware model, default light position):</p>
+
+                    <table class="help-table">
+                        <thead>
+                            <tr>
+                                <th>Trajectory</th>
+                                <th>RMSE (µW)</th>
+                                <th>R²</th>
+                                <th>ρ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Circle</td>
+                                <td>~20-25</td>
+                                <td>~0.90</td>
+                                <td>~0.95</td>
+                            </tr>
+                            <tr>
+                                <td>One</td>
+                                <td>~15-20</td>
+                                <td>~0.85</td>
+                                <td>~0.92</td>
+                            </tr>
+                            <tr>
+                                <td>Triangle</td>
+                                <td>~25-35</td>
+                                <td>~0.80</td>
+                                <td>~0.90</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <p class="note">
+                        <i class="fas fa-info-circle"></i> 
+                        These are approximate ranges. Exact values depend on light position settings.
+                    </p>
+                </section>
+
+                <!-- Troubleshooting -->
+                <section id="troubleshooting" class="help-section">
+                    <h2><i class="fas fa-wrench"></i> Troubleshooting</h2>
+                    
+                    <div class="format-card">
+                        <h4>Trajectory not visible</h4>
+                        <ul>
+                            <li>Refresh the page (Ctrl/Cmd + R)</li>
+                            <li>Check browser console for errors (F12 → Console)</li>
+                            <li>Ensure WebGL is enabled in your browser</li>
+                        </ul>
+                    </div>
+
+                    <div class="format-card">
+                        <h4>Power chart is empty</h4>
+                        <ul>
+                            <li>Select a different trajectory and switch back</li>
+                            <li>Click Reset button to reload data</li>
+                        </ul>
+                    </div>
+
+                    <div class="format-card">
+                        <h4>CSV upload fails</h4>
+                        <ul>
+                            <li>Ensure CSV has required columns (x, y, z or leap_palm_x, etc.)</li>
+                            <li>Check that values are numeric, not text</li>
+                            <li>Try a sample CSV from the data/ folder</li>
+                        </ul>
+                    </div>
+
+                    <div class="format-card">
+                        <h4>Simulated curve doesn't match real curve</h4>
+                        <ul>
+                            <li>Adjust light position sliders to find better fit</li>
+                            <li>Try "Calculate κ from Real Data" option</li>
+                            <li>This is expected — the model is an approximation</li>
+                        </ul>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- Footer -->
+        <footer class="help-footer">
+            <p>SolarTrack Radiometric Simulator — Testing Guide</p>
+        </footer>
+    </div>
+
+    <!-- Smooth scrolling and active nav highlighting -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('.help-section');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetSection = document.getElementById(targetId);
+                    if (targetSection) {
+                        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href') === '#' + id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, { threshold: 0.2, rootMargin: '-100px 0px -50% 0px' });
+            
+            sections.forEach(section => observer.observe(section));
+        });
+    </script>
+</body>
+</html>
+
