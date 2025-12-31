@@ -1,8 +1,0 @@
-# This file is used internally by FFMPEG.
-file 'file:/Users/kha053/Work/Collaboration/Yassein/radiometric_model/solartrack_demo/animations/media/videos/view_factor_v4/480p15/partial_movie_files/LambertianHemisphereClean/2023093938_3428110246_1110105074.mp4'
-file 'file:/Users/kha053/Work/Collaboration/Yassein/radiometric_model/solartrack_demo/animations/media/videos/view_factor_v4/480p15/partial_movie_files/LambertianHemisphereClean/2424764402_1530275952_3200096209.mp4'
-file 'file:/Users/kha053/Work/Collaboration/Yassein/radiometric_model/solartrack_demo/animations/media/videos/view_factor_v4/480p15/partial_movie_files/LambertianHemisphereClean/2424764402_1722695059_3735689000.mp4'
-file 'file:/Users/kha053/Work/Collaboration/Yassein/radiometric_model/solartrack_demo/animations/media/videos/view_factor_v4/480p15/partial_movie_files/LambertianHemisphereClean/2424764402_4032311965_173040797.mp4'
-file 'file:/Users/kha053/Work/Collaboration/Yassein/radiometric_model/solartrack_demo/animations/media/videos/view_factor_v4/480p15/partial_movie_files/LambertianHemisphereClean/2424764402_233831863_2959905515.mp4'
-file 'file:/Users/kha053/Work/Collaboration/Yassein/radiometric_model/solartrack_demo/animations/media/videos/view_factor_v4/480p15/partial_movie_files/LambertianHemisphereClean/1555371890_3445771655_1867541333.mp4'
-file 'file:/Users/kha053/Work/Collaboration/Yassein/radiometric_model/solartrack_demo/animations/media/videos/view_factor_v4/480p15/partial_movie_files/LambertianHemisphereClean/377779939_233831863_577486180.mp4'

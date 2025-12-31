@@ -1,8 +1,0 @@
-# This file is used internally by FFMPEG.
-file 'file:/Users/kha053/Work/Collaboration/Yassein/radiometric_model/solartrack_demo/animations/media/videos/view_factor_v3/480p15/partial_movie_files/LambertianSphereSimple/3793616576_2664271108_1038907366.mp4'
-file 'file:/Users/kha053/Work/Collaboration/Yassein/radiometric_model/solartrack_demo/animations/media/videos/view_factor_v3/480p15/partial_movie_files/LambertianSphereSimple/1844005603_233831863_2442977143.mp4'
-file 'file:/Users/kha053/Work/Collaboration/Yassein/radiometric_model/solartrack_demo/animations/media/videos/view_factor_v3/480p15/partial_movie_files/LambertianSphereSimple/1844005603_3327480168_2300530999.mp4'
-file 'file:/Users/kha053/Work/Collaboration/Yassein/radiometric_model/solartrack_demo/animations/media/videos/view_factor_v3/480p15/partial_movie_files/LambertianSphereSimple/1844005603_1805306074_940221769.mp4'
-file 'file:/Users/kha053/Work/Collaboration/Yassein/radiometric_model/solartrack_demo/animations/media/videos/view_factor_v3/480p15/partial_movie_files/LambertianSphereSimple/1844005603_233831863_3924263609.mp4'
-file 'file:/Users/kha053/Work/Collaboration/Yassein/radiometric_model/solartrack_demo/animations/media/videos/view_factor_v3/480p15/partial_movie_files/LambertianSphereSimple/1857761954_3445771655_3017975704.mp4'
-file 'file:/Users/kha053/Work/Collaboration/Yassein/radiometric_model/solartrack_demo/animations/media/videos/view_factor_v3/480p15/partial_movie_files/LambertianSphereSimple/435821099_233831863_2895475137.mp4'

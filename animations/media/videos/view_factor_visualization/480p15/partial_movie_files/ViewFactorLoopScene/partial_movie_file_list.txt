@@ -1,5 +1,0 @@
-# This file is used internally by FFMPEG.
-file 'file:/Users/kha053/Work/Collaboration/Yassein/radiometric_model/solartrack_demo/animations/media/videos/view_factor_visualization/480p15/partial_movie_files/ViewFactorLoopScene/1345643441_2840115676_940657226.mp4'
-file 'file:/Users/kha053/Work/Collaboration/Yassein/radiometric_model/solartrack_demo/animations/media/videos/view_factor_visualization/480p15/partial_movie_files/ViewFactorLoopScene/750387858_554495846_1324734156.mp4'
-file 'file:/Users/kha053/Work/Collaboration/Yassein/radiometric_model/solartrack_demo/animations/media/videos/view_factor_visualization/480p15/partial_movie_files/ViewFactorLoopScene/750387858_1492270537_4057354695.mp4'
-file 'file:/Users/kha053/Work/Collaboration/Yassein/radiometric_model/solartrack_demo/animations/media/videos/view_factor_visualization/480p15/partial_movie_files/ViewFactorLoopScene/750387858_233831863_4086356149.mp4'
