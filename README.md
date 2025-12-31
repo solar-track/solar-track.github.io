@@ -5,10 +5,7 @@ An interactive web-based simulator for modeling power harvesting from wearable s
 ## Quick Start
 
 ```bash
-# Install dependencies
 npm install
-
-# Run development server
 npm run dev
 ```
 
@@ -17,6 +14,7 @@ Open http://localhost:3000 in your browser.
 ## Features
 
 - Two physics-based radiometric models (Parallel Disk and Orientation Aware)
+- Real-time 3D visualization of hand trajectories
 - CSV import for motion capture data
 - Export simulated power traces
 
@@ -28,16 +26,6 @@ See the [Help Page](public/help.html) for comprehensive documentation including:
 - Input/output CSV formats
 - Configuration options
 - Usage guide
-
-## Build
-
-```bash
-# Production build
-npm run build
-
-# Deploy to GitHub Pages
-npm run deploy
-```
 
 ## Citation
 
