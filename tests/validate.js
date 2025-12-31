@@ -275,10 +275,31 @@ function computeMetrics(results) {
 // Main Validation
 // ============================================================================
 
+// Model name mapping for display
+const MODEL_NAMES = {
+    'parallel': 'Parallel Disk (Eq. A.5)',
+    'orientation_approx': 'Orientation Aware - Approximate',
+    'orientation_exact': 'Orientation Aware - Exact (Eq. A.4)'
+};
+
+function formatLightPos(pos) {
+    return `(${pos[0].toFixed(0)}, ${pos[1].toFixed(0)}, ${pos[2].toFixed(0)}) mm`;
+}
+
 async function main() {
-    console.log('╔══════════════════════════════════════════════════════════════╗');
-    console.log('║           SolarTrack Automated Test Validator                ║');
-    console.log('╚══════════════════════════════════════════════════════════════╝\n');
+    console.log('╔══════════════════════════════════════════════════════════════════════╗');
+    console.log('║              SolarTrack Automated Test Validator                     ║');
+    console.log('╚══════════════════════════════════════════════════════════════════════╝\n');
+    
+    console.log('Validation Process:');
+    console.log('  1. Load trajectory CSV (position + normal vectors)');
+    console.log('  2. Compute view factor using specified radiometric model');
+    console.log('  3. Calculate κ (kappa) via least-squares: P_real = κ × F(a,H)');
+    console.log('  4. Compute metrics: RMSE, R², Pearson correlation (ρ)');
+    console.log('  5. Compare against precomputed expected values\n');
+    
+    console.log('Tolerance thresholds:');
+    console.log(`  RMSE: ±${TOLERANCES.rmse_uW} µW | R²: ±${TOLERANCES.r2} | ρ: ±${TOLERANCES.pearson}\n`);
     
     const expectedPath = './tests/expected/expected_metrics.json';
     const dataDir = './tests/data';
@@ -296,8 +317,7 @@ async function main() {
     let passedTests = 0;
     let failedTests = [];
     
-    console.log(`Testing ${files.length} gestures...\n`);
-    console.log('─'.repeat(70));
+    console.log('─'.repeat(78));
     
     for (const file of files) {
         const gestureName = file.replace('__Synchronized.csv', '').replace('.csv', '');
@@ -307,53 +327,73 @@ async function main() {
             continue;
         }
         
-        console.log(`\n📁 ${gestureName}`);
-        
         const records = loadCSV(`${dataDir}/${file}`);
         const trajectory = extractTrajectory(records);
+        
+        console.log(`\n📁 ${gestureName} (${trajectory.length} samples)`);
         
         for (const [configName, expectedData] of Object.entries(expected[gestureName])) {
             totalTests++;
             const config = expectedData.config;
+            const modelName = MODEL_NAMES[config.model] || config.model;
+            const lightPos = formatLightPos(config.lightPos);
+            
+            console.log(`\n   ┌─ ${modelName}`);
+            console.log(`   │  Light: ${lightPos}, Diameter: ${config.diameter}mm`);
+            
+            // Run simulation
             const { kappa, results } = simulateTrajectory(trajectory, config);
             const actualMetrics = computeMetrics(results);
             
-            // Compare metrics
+            console.log(`   │  κ = ${kappa.toExponential(3)} (computed via least-squares)`);
+            console.log(`   │`);
+            console.log(`   │  Computed metrics:`);
+            console.log(`   │    RMSE = ${actualMetrics.rmse_uW.toFixed(2)} µW`);
+            console.log(`   │    R²   = ${actualMetrics.r2.toFixed(4)}`);
+            console.log(`   │    ρ    = ${actualMetrics.pearson.toFixed(4)}`);
+            
+            // Compare with expected
             const diffs = {
                 rmse_uW: Math.abs(actualMetrics.rmse_uW - expectedData.metrics.rmse_uW),
                 r2: Math.abs(actualMetrics.r2 - expectedData.metrics.r2),
                 pearson: Math.abs(actualMetrics.pearson - expectedData.metrics.pearson)
             };
             
-            const passed = 
-                diffs.rmse_uW <= TOLERANCES.rmse_uW &&
-                diffs.r2 <= TOLERANCES.r2 &&
-                diffs.pearson <= TOLERANCES.pearson;
+            const rmseOk = diffs.rmse_uW <= TOLERANCES.rmse_uW;
+            const r2Ok = diffs.r2 <= TOLERANCES.r2;
+            const pearsonOk = diffs.pearson <= TOLERANCES.pearson;
+            const passed = rmseOk && r2Ok && pearsonOk;
+            
+            console.log(`   │`);
+            console.log(`   │  Expected vs Actual (tolerance):`);
+            console.log(`   │    RMSE: ${expectedData.metrics.rmse_uW.toFixed(2)} vs ${actualMetrics.rmse_uW.toFixed(2)} µW  Δ=${diffs.rmse_uW.toFixed(3)} ${rmseOk ? '✓' : '✗ EXCEEDS'}`);
+            console.log(`   │    R²:   ${expectedData.metrics.r2.toFixed(4)} vs ${actualMetrics.r2.toFixed(4)}  Δ=${diffs.r2.toFixed(5)} ${r2Ok ? '✓' : '✗ EXCEEDS'}`);
+            console.log(`   │    ρ:    ${expectedData.metrics.pearson.toFixed(4)} vs ${actualMetrics.pearson.toFixed(4)}  Δ=${diffs.pearson.toFixed(5)} ${pearsonOk ? '✓' : '✗ EXCEEDS'}`);
             
             if (passed) {
                 passedTests++;
-                console.log(`   ✅ ${configName}`);
+                console.log(`   └─ ✅ PASS`);
             } else {
                 failedTests.push({ gesture: gestureName, config: configName, diffs, expected: expectedData.metrics, actual: actualMetrics });
-                console.log(`   ❌ ${configName}`);
-                console.log(`      RMSE: expected ${expectedData.metrics.rmse_uW.toFixed(2)}µW, got ${actualMetrics.rmse_uW.toFixed(2)}µW (Δ${diffs.rmse_uW.toFixed(2)})`);
-                console.log(`      R²: expected ${expectedData.metrics.r2.toFixed(4)}, got ${actualMetrics.r2.toFixed(4)} (Δ${diffs.r2.toFixed(4)})`);
-                console.log(`      ρ: expected ${expectedData.metrics.pearson.toFixed(4)}, got ${actualMetrics.pearson.toFixed(4)} (Δ${diffs.pearson.toFixed(4)})`);
+                console.log(`   └─ ❌ FAIL (metrics deviate beyond tolerance)`);
             }
         }
     }
     
-    console.log('\n' + '─'.repeat(70));
+    console.log('\n' + '─'.repeat(78));
     console.log('\n📊 SUMMARY');
-    console.log(`   Total tests: ${totalTests}`);
-    console.log(`   Passed: ${passedTests} ✅`);
-    console.log(`   Failed: ${failedTests.length} ❌`);
+    console.log(`   Total tests:  ${totalTests}`);
+    console.log(`   Passed:       ${passedTests} ✅`);
+    console.log(`   Failed:       ${failedTests.length} ❌`);
     
     if (failedTests.length === 0) {
-        console.log('\n🎉 All tests passed!\n');
+        console.log('\n🎉 All tests passed! Radiometric models produce consistent results.\n');
         process.exit(0);
     } else {
-        console.log('\n⚠️  Some tests failed. Check output above for details.\n');
+        console.log('\n⚠️  Some tests failed. Model outputs deviate from expected baselines.');
+        console.log('   This may indicate:');
+        console.log('   - A bug in the model implementation');
+        console.log('   - Expected outputs need regeneration (npm run test:generate)\n');
         process.exit(1);
     }
 }

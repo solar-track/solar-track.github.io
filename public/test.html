@@ -47,8 +47,6 @@
                     <li><a href="#quick-validation" class="nav-link"><i class="fas fa-bolt"></i> Quick Validation</a></li>
                     <li><a href="#model-test" class="nav-link"><i class="fas fa-balance-scale"></i> Model Comparison</a></li>
                     <li><a href="#csv-test" class="nav-link"><i class="fas fa-file-csv"></i> CSV Upload</a></li>
-                    <li><a href="#expected-results" class="nav-link"><i class="fas fa-chart-bar"></i> Expected Results</a></li>
-                    <li><a href="#troubleshooting" class="nav-link"><i class="fas fa-wrench"></i> Troubleshooting</a></li>
                 </ul>
             </nav>
 
@@ -106,28 +104,45 @@
                         <code>npm test</code>
                     </div>
 
-                    <h3>Expected Output</h3>
-                    <div class="code-block" style="font-size: 0.85rem;">
-                        <pre>╔══════════════════════════════════════════════════════════════╗
-║           SolarTrack Automated Test Validator                ║
-╚══════════════════════════════════════════════════════════════╝
+                    <h3>Example Output</h3>
+                    <div class="code-block" style="font-size: 0.8rem; overflow-x: auto;">
+                        <pre>Validation Process:
+  1. Load trajectory CSV (position + normal vectors)
+  2. Compute view factor using specified radiometric model
+  3. Calculate κ (kappa) via least-squares: P_real = κ × F(a,H)
+  4. Compute metrics: RMSE, R², Pearson correlation (ρ)
+  5. Compare against precomputed expected values
 
-Testing 5 gestures...
+Tolerance thresholds:
+  RMSE: ±1 µW | R²: ±0.001 | ρ: ±0.001
 
-📁 Circle
-   ✅ parallel_default
-   ✅ orientation_approx_default
-   ✅ orientation_exact_default
-   ✅ parallel_centered
+──────────────────────────────────────────────────────────────────
 
-... (more gestures) ...
+📁 Circle (2667 samples)
+
+   ┌─ Parallel Disk (Eq. A.5)
+   │  Light: (-160, 869, 168) mm, Diameter: 100mm
+   │  κ = 2.883e-3 (computed via least-squares)
+   │
+   │  Computed metrics:
+   │    RMSE = 44.85 µW
+   │    R²   = 0.4150
+   │    ρ    = 0.7595
+   │
+   │  Expected vs Actual (tolerance):
+   │    RMSE: 44.85 vs 44.85 µW  Δ=0.000 ✓
+   │    R²:   0.4150 vs 0.4150  Δ=0.00000 ✓
+   │    ρ:    0.7595 vs 0.7595  Δ=0.00000 ✓
+   └─ ✅ PASS
+
+... (19 more test cases) ...
 
 📊 SUMMARY
-   Total tests: 20
-   Passed: 20 ✅
-   Failed: 0 ❌
+   Total tests:  20
+   Passed:       20 ✅
+   Failed:       0 ❌
 
-🎉 All tests passed!</pre>
+🎉 All tests passed! Radiometric models produce consistent results.</pre>
                     </div>
 
                     <h3>Test Data Structure</h3>
@@ -315,89 +330,6 @@ Testing 5 gestures...
                         <li>Verify CSV file is downloaded</li>
                         <li>Open the file — should contain timestamp, simulated_power_W, a_mm, H_mm columns</li>
                     </ol>
-                </section>
-
-                <!-- Expected Results -->
-                <section id="expected-results" class="help-section">
-                    <h2><i class="fas fa-chart-bar"></i> Expected Results</h2>
-                    
-                    <p>Reference metrics for the default configuration (Orientation Aware model, default light position):</p>
-
-                    <table class="help-table">
-                        <thead>
-                            <tr>
-                                <th>Trajectory</th>
-                                <th>RMSE (µW)</th>
-                                <th>R²</th>
-                                <th>ρ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Circle</td>
-                                <td>~20-25</td>
-                                <td>~0.90</td>
-                                <td>~0.95</td>
-                            </tr>
-                            <tr>
-                                <td>One</td>
-                                <td>~15-20</td>
-                                <td>~0.85</td>
-                                <td>~0.92</td>
-                            </tr>
-                            <tr>
-                                <td>Triangle</td>
-                                <td>~25-35</td>
-                                <td>~0.80</td>
-                                <td>~0.90</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <p class="note">
-                        <i class="fas fa-info-circle"></i> 
-                        These are approximate ranges. Exact values depend on light position settings.
-                    </p>
-                </section>
-
-                <!-- Troubleshooting -->
-                <section id="troubleshooting" class="help-section">
-                    <h2><i class="fas fa-wrench"></i> Troubleshooting</h2>
-                    
-                    <div class="format-card">
-                        <h4>Trajectory not visible</h4>
-                        <ul>
-                            <li>Refresh the page (Ctrl/Cmd + R)</li>
-                            <li>Check browser console for errors (F12 → Console)</li>
-                            <li>Ensure WebGL is enabled in your browser</li>
-                        </ul>
-                    </div>
-
-                    <div class="format-card">
-                        <h4>Power chart is empty</h4>
-                        <ul>
-                            <li>Select a different trajectory and switch back</li>
-                            <li>Click Reset button to reload data</li>
-                        </ul>
-                    </div>
-
-                    <div class="format-card">
-                        <h4>CSV upload fails</h4>
-                        <ul>
-                            <li>Ensure CSV has required columns (x, y, z or leap_palm_x, etc.)</li>
-                            <li>Check that values are numeric, not text</li>
-                            <li>Try a sample CSV from the data/ folder</li>
-                        </ul>
-                    </div>
-
-                    <div class="format-card">
-                        <h4>Simulated curve doesn't match real curve</h4>
-                        <ul>
-                            <li>Adjust light position sliders to find better fit</li>
-                            <li>Try "Calculate κ from Real Data" option</li>
-                            <li>This is expected — the model is an approximation</li>
-                        </ul>
-                    </div>
                 </section>
             </main>
         </div>
