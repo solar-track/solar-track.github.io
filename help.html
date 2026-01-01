@@ -43,7 +43,6 @@
                     <li><a href="#kappa" class="nav-link"><i class="fas fa-sliders-h"></i> Scale κ</a></li>
                     <li><a href="#advanced" class="nav-link"><i class="fas fa-cog"></i> Advanced Settings</a></li>
                     <li><a href="#csv-format" class="nav-link"><i class="fas fa-route"></i> Input Format</a></li>
-                    <li><a href="#theory" class="nav-link"><i class="fas fa-book-open"></i> Considerations</a></li>
                     <li><a href="#citation" class="nav-link"><i class="fas fa-quote-left"></i> Citation</a></li>
                     <li><a href="#references" class="nav-link"><i class="fas fa-book"></i> References</a></li>
                     <li class="nav-divider"></li>
@@ -155,7 +154,7 @@
                                 <p>Choose <strong>Orientation Aware</strong> or <strong>Parallel Disk</strong> model.</p>
                             </a>
                             
-                            <a href="#theory" class="eq-step-card" data-target="geometry">
+                            <a href="#view-factor" class="eq-step-card" data-target="geometry">
                                 <div class="card-icon"><i class="fas fa-arrows-alt"></i></div>
                                 <h4>Geometry</h4>
                                 <p>Lateral offset (a) and vertical separation (H) from trajectory and light position.</p>
@@ -726,26 +725,14 @@
                         </tbody>
                     </table>
                     <p class="note">The export file also includes metadata comments at the top with trajectory name, model type, light position, and κ value if applicable.</p>
-                </section>
 
-                <!-- Modeling Considerations -->
-                <section id="theory" class="help-section">
-                    <h2><i class="fas fa-book-open"></i> Modeling Considerations</h2>
-                    
-                    <p>The current version of the simulator assumes:</p>
-                    <ul>
-                        <li><strong>Single dominant emitter:</strong> One light source dominates the irradiance at the cell.</li>
-                        <li><strong>Uniform irradiance over cell:</strong> The cell is small enough that irradiance is approximately constant over its surface.</li>
-                        <li><strong>Cell below lamp:</strong> The vertical separation $H > 0$ (cell is below the light source).</li>
-                    </ul>
-                    <p class="model-note">
-                        <i class="fas fa-envelope"></i> For questions or feedback, contact 
-                        <a href="mailto:abdelwahed.khamis@data61.csiro.au">abdelwahed.khamis@data61.csiro.au</a> 
-                        or <a href="https://github.com/solar-track/solar-track.github.io/issues" target="_blank">open an issue on GitHub</a>.
+                    <p class="model-note" style="margin-top: 1.5rem;">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Modeling assumptions:</strong> single dominant emitter, uniform irradiance over cell, 
+                        and cell positioned below the lamp ($H > 0$).
                     </p>
                 </section>
 
-                <!-- Geometry (a, H) -->
                 <!-- Citation -->
                 <section id="citation" class="help-section">
                     <h2><i class="fas fa-quote-left"></i> Citation</h2>
