@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="public/assets/solartrack_icon.svg" alt="SolarTrack" width="80">
+</p>
+
 # SolarTrack Radiometric Simulator
 
 An interactive web-based simulator for modeling power harvesting from wearable solar cells under controlled lighting conditions.
@@ -30,12 +34,7 @@ This runs 20 test cases (5 trajectories × 4 model configurations) against preco
 
 ## Documentation
 
-See the [Help Page](public/help.html) for comprehensive documentation including:
-
-- Model equations and theory
-- Input/output CSV formats
-- Configuration options
-- Usage guide
+See the [Documentation Page](public/help.html) for model equations, CSV formats, and usage guide.
 
 ## Citation
 
