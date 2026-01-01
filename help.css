@@ -570,7 +570,7 @@ body {
 }
 
 .model-comparison-figure img {
-    max-width: 50%;
+    max-width: 80%;
     height: auto;
 }
 
@@ -1123,5 +1123,90 @@ a:hover {
     .eq-operator, .eq-paren {
         font-size: 1.25rem;
     }
+}
+
+/* ===== Testing Guide Styles ===== */
+
+/* Navigation divider */
+.nav-divider {
+    border-top: 1px solid var(--border);
+    margin: 0.75rem 0;
+    padding: 0;
+}
+
+/* Header with multiple buttons */
+.header-right {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* Steps for testing */
+.steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.step {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.step-number {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    background: var(--primary-purple);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.step-content {
+    flex: 1;
+}
+
+.step-content h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--primary-purple-dark);
+}
+
+.step-content p {
+    margin: 0.5rem 0;
+}
+
+/* Checklist */
+.checklist {
+    list-style: none;
+    padding: 0;
+    margin: 0.75rem 0;
+}
+
+.checklist li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0;
+}
+
+.checklist li i {
+    color: var(--accent-green);
+    font-size: 0.9rem;
+}
+
+/* Override help-table for testing page */
+.help-section ol {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+}
+
+.help-section ol li {
+    margin: 0.5rem 0;
 }
 

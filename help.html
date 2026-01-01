@@ -46,6 +46,8 @@
                     <li><a href="#theory" class="nav-link"><i class="fas fa-book-open"></i> Considerations</a></li>
                     <li><a href="#citation" class="nav-link"><i class="fas fa-quote-left"></i> Citation</a></li>
                     <li><a href="#references" class="nav-link"><i class="fas fa-book"></i> References</a></li>
+                    <li class="nav-divider"></li>
+                    <li><a href="/test.html" class="nav-link"><i class="fas fa-vial"></i> Testing Guide</a></li>
                 </ul>
             </nav>
 
@@ -319,7 +321,7 @@
                         <tbody>
                             <tr>
                                 <td><strong>Trajectory</strong></td>
-                                <td>Select from preloaded gestures or choose "Custom" to draw your own</td>
+                                <td>Select from preloaded trajectorys or choose "Custom" to draw your own</td>
                             </tr>
                             <tr>
                                 <td><strong>Upload Motion Capture</strong></td>
@@ -389,7 +391,7 @@
                     <p>The simulator supports two radiometric models for computing the view factor 
                        between the light source and the solar cell.</p>
 
-                    <figure class="model-comparison-figure">
+                    <figure class="overview-figure">
                         <img src="/assets/parallel_vs_orientation.png" alt="Comparison of Parallel Disk and Orientation Aware models">
                         <figcaption>Parallel Disk assumes cell normals $\mathbf{n}_c$ always point upward (parallel to emitter normal $\mathbf{n}_e$), while Orientation Aware accounts for actual cell tilt along the trajectory.</figcaption>
                     </figure>
@@ -467,6 +469,11 @@
                             see <a href="#advanced">Advanced Settings</a>.
                         </p>
                     </div>
+
+                    <figure class="model-comparison-figure">
+                        <img src="/assets/orientation_vs_parallel_smple.png" alt="Power curve comparison between Orientation Aware and Parallel Disk models">
+                        <figcaption>Triangle trajectory: Orientation Aware (left) captures tilt-induced variations with higher R², while Parallel Disk (right) produces a smoother curve that misses these details.</figcaption>
+                    </figure>
                 </section>
 
                 <!-- Scale κ (Kappa Parameter) -->
@@ -718,22 +725,24 @@
                             </tr>
                         </tbody>
                     </table>
-                    <p class="note">The export file also includes metadata comments at the top with gesture name, model type, light position, and κ value if applicable.</p>
+                    <p class="note">The export file also includes metadata comments at the top with trajectory name, model type, light position, and κ value if applicable.</p>
                 </section>
 
                 <!-- Modeling Considerations -->
                 <section id="theory" class="help-section">
                     <h2><i class="fas fa-book-open"></i> Modeling Considerations</h2>
                     
-                    <div class="info-box">
-                        <p>The radiometric model makes the following assumptions (as stated in the paper):</p>
-                        <ul>
-                            <li><strong>Single dominant emitter:</strong> One light source dominates the irradiance at the cell.</li>
-                            <li><strong>Uniform irradiance over cell:</strong> The cell is small enough that irradiance is approximately constant over its surface, enabling the simplification $P \approx \eta A_c I(\cdot)$.</li>
-                            <li><strong>Lambertian emission profile:</strong> The emitter has an angular profile $\cos^m(\theta_e)$ with $m = 1$ (Lambertian approximation).</li>
-                            <li><strong>Cell below lamp:</strong> The vertical separation $H > 0$ (cell is below the light source).</li>
-                        </ul>
-                    </div>
+                    <p>The current version of the simulator assumes:</p>
+                    <ul>
+                        <li><strong>Single dominant emitter:</strong> One light source dominates the irradiance at the cell.</li>
+                        <li><strong>Uniform irradiance over cell:</strong> The cell is small enough that irradiance is approximately constant over its surface.</li>
+                        <li><strong>Cell below lamp:</strong> The vertical separation $H > 0$ (cell is below the light source).</li>
+                    </ul>
+                    <p class="model-note">
+                        <i class="fas fa-envelope"></i> For questions or feedback, contact 
+                        <a href="mailto:abdelwahed.khamis@data61.csiro.au">abdelwahed.khamis@data61.csiro.au</a> 
+                        or <a href="https://github.com/solar-track/solar-track.github.io/issues" target="_blank">open an issue on GitHub</a>.
+                    </p>
                 </section>
 
                 <!-- Geometry (a, H) -->
@@ -811,11 +820,15 @@
             // Smooth scroll
             navLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const targetId = this.getAttribute('href').substring(1);
-                    const targetSection = document.getElementById(targetId);
-                    if (targetSection) {
-                        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    const href = this.getAttribute('href');
+                    // Only handle internal anchor links, allow external links to work normally
+                    if (href.startsWith('#')) {
+                        e.preventDefault();
+                        const targetId = href.substring(1);
+                        const targetSection = document.getElementById(targetId);
+                        if (targetSection) {
+                            targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
                     }
                 });
             });

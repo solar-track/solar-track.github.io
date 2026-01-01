@@ -12,8 +12,8 @@
     <!-- MathJax for LaTeX rendering -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-  <script type="module" crossorigin src="/assets/index-BwzvTqny.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-UG4t3qht.css">
+  <script type="module" crossorigin src="/assets/index-Cawz_l1A.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-9GbBFOJZ.css">
 </head>
 <body>
     <div id="app">
@@ -23,21 +23,17 @@
                 <div class="title-row">
                     <img src="/assets/solartrack_icon.svg" alt="SolarTrack Icon" class="header-icon">
                     <h1>SolarTrack Radiometric Simulator</h1>
-                    <a href="help.html" class="help-link" target="_blank" title="Help & Documentation">
+                </div>
+                <div class="header-icons">
+                    <a href="help.html" class="header-icon-btn" target="_blank" title="Help & Documentation">
                         <i class="fas fa-question-circle"></i>
                     </a>
-                </div>
-                <div class="header-text">
-                    <div class="header-buttons" style="display: none;">
-                        <a href="#" class="header-btn" id="code-btn">
-                            <i class="fab fa-github"></i>
-                            Code & Dataset
-                        </a>
-                        <a href="#" class="header-btn" id="paper-btn">
-                            <i class="fas fa-file-alt"></i>
-                            Paper
-                        </a>
-                    </div>
+                    <a href="https://github.com/solar-track/solar-track.github.io" class="header-icon-btn" target="_blank" title="GitHub Repository">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="#" class="header-icon-btn" id="paper-btn" title="Paper (Coming Soon)">
+                        <i class="fas fa-file-alt"></i>
+                    </a>
                 </div>
             </div>
         </header>
@@ -55,8 +51,8 @@
                     </h3>
                     
                     <div class="control-group">
-                        <label for="gesture-select">Trajectory:</label>
-                        <select id="gesture-select">
+                        <label for="trajectory-select">Trajectory:</label>
+                        <select id="trajectory-select">
                             <option value="Circle">Circle</option>
                             <option value="One">One</option>
                             <option value="Two">Two</option>
@@ -152,7 +148,7 @@
                         <div class="mobile-controls">
                             <!-- Top-left: Trajectory selector -->
                             <div class="mobile-control mobile-trajectory">
-                                <select id="mobile-gesture-select">
+                                <select id="mobile-trajectory-select">
                                     <option value="Circle">Circle</option>
                                     <option value="One">One</option>
                                     <option value="Two">Two</option>
