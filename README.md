@@ -31,16 +31,18 @@ npm run dev
 
 Open http://localhost:3000 in your browser.
 
+
+## Documentation
+
+See the [Documentation Page](public/help.html) for usage guide,  model configurations and import/export formats.
+
+
 ## Features
 
 - Two physics-based radiometric models (Parallel Disk and Orientation Aware)
 - Real-time 3D visualization of hand trajectories
 - CSV import for motion capture data
 - Export simulated power traces
-
-## Documentation
-
-See the [Documentation Page](public/help.html) for model configurations, CSV formats, and usage guide.
 
 ## Testing
 
