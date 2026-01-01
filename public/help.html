@@ -732,13 +732,17 @@
                 <section id="theory" class="help-section">
                     <h2><i class="fas fa-book-open"></i> Modeling Considerations</h2>
                     
-                    <div class="info-box">
-                        <p>The current version of the simulator makes the following assumptions:</p>
-                        <ul>
-                            <li><strong>Single dominant emitter:</strong> One light source dominates the irradiance at the cell.</li>
-                            <li><strong>Cell below lamp:</strong> The vertical separation $H > 0$ (cell is below the light source).</li>
-                        </ul>
-                    </div>
+                    <p>The current version of the simulator assumes:</p>
+                    <ul>
+                        <li><strong>Single dominant emitter:</strong> One light source dominates the irradiance at the cell.</li>
+                        <li><strong>Uniform irradiance over cell:</strong> The cell is small enough that irradiance is approximately constant over its surface.</li>
+                        <li><strong>Cell below lamp:</strong> The vertical separation $H > 0$ (cell is below the light source).</li>
+                    </ul>
+                    <p class="model-note">
+                        <i class="fas fa-envelope"></i> For questions or feedback, contact 
+                        <a href="mailto:abdelwahed.khamis@data61.csiro.au">abdelwahed.khamis@data61.csiro.au</a> 
+                        or <a href="https://github.com/solar-track/solar-track.github.io/issues" target="_blank">open an issue on GitHub</a>.
+                    </p>
                 </section>
 
                 <!-- Geometry (a, H) -->
