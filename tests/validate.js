@@ -320,19 +320,19 @@ async function main() {
     console.log('─'.repeat(78));
     
     for (const file of files) {
-        const gestureName = file.replace('__Synchronized.csv', '').replace('.csv', '');
+        const trajectoryName = file.replace('__Synchronized.csv', '').replace('.csv', '');
         
-        if (!expected[gestureName]) {
-            console.log(`⚠️  ${gestureName}: No expected data (skipped)`);
+        if (!expected[trajectoryName]) {
+            console.log(`⚠️  ${trajectoryName}: No expected data (skipped)`);
             continue;
         }
         
         const records = loadCSV(`${dataDir}/${file}`);
         const trajectory = extractTrajectory(records);
         
-        console.log(`\n📁 ${gestureName} (${trajectory.length} samples)`);
+        console.log(`\n📁 ${trajectoryName} (${trajectory.length} samples)`);
         
-        for (const [configName, expectedData] of Object.entries(expected[gestureName])) {
+        for (const [configName, expectedData] of Object.entries(expected[trajectoryName])) {
             totalTests++;
             const config = expectedData.config;
             const modelName = MODEL_NAMES[config.model] || config.model;
@@ -374,7 +374,7 @@ async function main() {
                 passedTests++;
                 console.log(`   └─ ✅ PASS`);
             } else {
-                failedTests.push({ gesture: gestureName, config: configName, diffs, expected: expectedData.metrics, actual: actualMetrics });
+                failedTests.push({ trajectory: trajectoryName, config: configName, diffs, expected: expectedData.metrics, actual: actualMetrics });
                 console.log(`   └─ ❌ FAIL (metrics deviate beyond tolerance)`);
             }
         }

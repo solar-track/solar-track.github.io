@@ -42,8 +42,7 @@
             <!-- Navigation Sidebar -->
             <nav class="help-nav">
                 <ul>
-                    <li><a href="#overview" class="nav-link active"><i class="fas fa-clipboard-check"></i> Overview</a></li>
-                    <li><a href="#automated-tests" class="nav-link"><i class="fas fa-robot"></i> Automated Tests</a></li>
+                    <li><a href="#automated-tests" class="nav-link active"><i class="fas fa-robot"></i> Automated Tests</a></li>
                     <li><a href="#quick-validation" class="nav-link"><i class="fas fa-bolt"></i> Quick Validation</a></li>
                     <li><a href="#model-test" class="nav-link"><i class="fas fa-balance-scale"></i> Model Comparison</a></li>
                     <li><a href="#csv-test" class="nav-link"><i class="fas fa-file-csv"></i> CSV Upload</a></li>
@@ -58,25 +57,7 @@
                     
                     <p class="lead">
                         This guide helps you verify that the SolarTrack Radiometric Simulator is working correctly.
-                        Follow the tests below to validate the core functionality.
                     </p>
-
-                    <div class="info-box">
-                        <h4><i class="fas fa-info-circle"></i> What These Tests Validate</h4>
-                        <ul>
-                            <li><strong>3D Visualization:</strong> Trajectories render correctly in the scene</li>
-                            <li><strong>Radiometric Models:</strong> Power calculations match expected physics</li>
-                            <li><strong>Animation:</strong> Playback and real-time updates work</li>
-                            <li><strong>Data I/O:</strong> CSV import and export function properly</li>
-                        </ul>
-                    </div>
-
-                    <h3>Prerequisites</h3>
-                    <ul>
-                        <li>Node.js v16 or higher</li>
-                        <li>Modern browser (Chrome, Firefox, Safari, Edge)</li>
-                        <li>Terminal access</li>
-                    </ul>
                 </section>
 
                 <!-- Automated Tests -->
@@ -85,19 +66,55 @@
                     
                     <p class="lead">
                         Run the automated test suite to verify that the radiometric models produce 
-                        correct results against precomputed expected outputs.
+                        consistent results against precomputed expected outputs.
                     </p>
 
-                    <div class="info-box">
-                        <h4><i class="fas fa-check-double"></i> What is Tested</h4>
-                        <ul>
-                            <li><strong>20 test cases:</strong> 5 gestures × 4 model configurations</li>
-                            <li><strong>Parallel Disk model:</strong> View factor calculation (Eq. A.5)</li>
-                            <li><strong>Orientation Aware (Approximate):</strong> Cosine-corrected view factor</li>
-                            <li><strong>Orientation Aware (Exact):</strong> Full integration (Eq. A.4)</li>
-                            <li><strong>Metrics validated:</strong> RMSE, R², Pearson correlation (ρ)</li>
-                        </ul>
-                    </div>
+                    <h3>Test Data</h3>
+                    <p>
+                        The tests use 5 trajectory CSVs in <code>tests/data/</code>, derived from the 
+                        motion capture recordings used in the paper. Each contains position, normal vectors, 
+                        and measured power from a wearable solar cell.
+                    </p>
+                    <table class="help-table">
+                        <thead>
+                            <tr><th>File</th><th>Samples</th><th>Description</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>Circle__Synchronized.csv</code></td><td>2667</td><td>Circular hand motion</td></tr>
+                            <tr><td><code>One__Synchronized.csv</code></td><td>1797</td><td>Drawing "1" gesture</td></tr>
+                            <tr><td><code>Three__Synchronized.csv</code></td><td>4051</td><td>Drawing "3" gesture</td></tr>
+                            <tr><td><code>Triangle__Synchronized.csv</code></td><td>2753</td><td>Triangular motion with tilt</td></tr>
+                            <tr><td><code>Two__Synchronized.csv</code></td><td>3379</td><td>Drawing "2" gesture</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Validation Metrics</h3>
+                    <table class="help-table">
+                        <thead>
+                            <tr><th>Metric</th><th>Definition</th><th>Pass Tolerance</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>RMSE</strong></td>
+                                <td>Root Mean Square Error between simulated and real power (in µW)</td>
+                                <td>±1 µW</td>
+                            </tr>
+                            <tr>
+                                <td><strong>R²</strong></td>
+                                <td>Coefficient of determination — how much variance in real power is explained by the model (1 = perfect fit)</td>
+                                <td>±0.001</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ρ (rho)</strong></td>
+                                <td>Pearson correlation — linear relationship between simulated and real power (1 = perfect correlation)</td>
+                                <td>±0.001</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="note">
+                        <i class="fas fa-info-circle"></i>
+                        A test passes if all three metrics match the precomputed expected values within their tolerances.
+                    </p>
 
                     <h3>Run Automated Tests</h3>
                     <div class="code-block">
@@ -259,7 +276,7 @@ Tolerance thresholds:
                     <div class="info-box">
                         <h4><i class="fas fa-lightbulb"></i> Best Test Case: Triangle Trajectory</h4>
                         <p>
-                            The <strong>Triangle</strong> gesture shows the clearest difference between models 
+                            The <strong>Triangle</strong> trajectory shows the clearest difference between models 
                             because the hand tilts significantly during the motion.
                         </p>
                     </div>

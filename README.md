@@ -19,7 +19,7 @@ Run automated tests to validate the radiometric models:
 npm test
 ```
 
-This runs 20 test cases (5 gestures × 4 model configurations) against precomputed expected outputs. See [Testing Guide](public/test.html) for details.
+This runs 20 test cases (5 trajectories × 4 model configurations) against precomputed expected outputs. See [Testing Guide](public/test.html) for details.
 
 ## Features
 

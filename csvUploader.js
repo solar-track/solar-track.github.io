@@ -133,8 +133,8 @@ export class CSVUploader {
                 throw new Error('CSV must contain at least 10 samples');
             }
 
-            // Create gesture data object
-            const gestureData = {
+            // Create trajectory data object
+            const trajectoryData = {
                 name: `Uploaded: ${filename}`,
                 positions: positions,
                 normals: normals,
@@ -151,9 +151,9 @@ export class CSVUploader {
                 this.showStatus(`✅ Loaded ${positions.length} samples from ${filename}`, 'success');
             }, 500);
 
-            console.log('Calling loadUploadedGesture...');
+            console.log('Calling loadUploadedTrajectory...');
             // Load into app
-            this.app.loadUploadedGesture(gestureData);
+            this.app.loadUploadedTrajectory(trajectoryData);
 
         } catch (error) {
             this.hideProgress();

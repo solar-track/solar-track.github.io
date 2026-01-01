@@ -49,8 +49,8 @@ class SolarTrackDemo {
         this.csvUploader = null;
         
         // Data
-        this.currentGestureData = null;
-        this.uploadedGestureCache = null; // Cache for uploaded CSV data
+        this.currentTrajectoryData = null;
+        this.uploadedTrajectoryCache = null; // Cache for uploaded CSV data
         this.currentModel = 'oriented';
         this.currentAccuracy = 'fast'; // 'fast' (approximate) or 'exact' (Eq. A.4)
         this.lightPosition = [...CONSTANTS.SOURCE_CENTER];
@@ -102,16 +102,16 @@ class SolarTrackDemo {
         this.setupEventListeners();
         console.log('✓ Event listeners setup');
         
-        // Load initial gesture
-        await this.loadGesture('Circle');
-        console.log('✓ Initial gesture loaded');
+        // Load initial trajectory
+        await this.loadTrajectory('Circle');
+        console.log('✓ Initial trajectory loaded');
         
         console.log('✅ Demo ready!');
     }
     
     cacheElements() {
         this.elements = {
-            gestureSelect: document.getElementById('gesture-select'),
+            trajectorySelect: document.getElementById('trajectory-select'),
             modelRadios: document.querySelectorAll('input[name="model"]'),
             lightXSlider: document.getElementById('light-x'),
             lightYSlider: document.getElementById('light-y'),
@@ -154,9 +154,9 @@ class SolarTrackDemo {
     }
     
     setupEventListeners() {
-        // Gesture selection
-        this.elements.gestureSelect.addEventListener('change', (e) => {
-            this.loadGesture(e.target.value);
+        // Trajectory selection
+        this.elements.trajectorySelect.addEventListener('change', (e) => {
+            this.loadTrajectory(e.target.value);
         });
         
         // Model selection
@@ -222,12 +222,12 @@ class SolarTrackDemo {
     }
     
     setupMobileControls() {
-        // Mobile gesture selector
-        const mobileGestureSelect = document.getElementById('mobile-gesture-select');
-        if (mobileGestureSelect) {
-            mobileGestureSelect.addEventListener('change', (e) => {
-                this.elements.gestureSelect.value = e.target.value;
-                this.loadGesture(e.target.value);
+        // Mobile trajectory selector
+        const mobileTrajectorySelect = document.getElementById('mobile-trajectory-select');
+        if (mobileTrajectorySelect) {
+            mobileTrajectorySelect.addEventListener('change', (e) => {
+                this.elements.trajectorySelect.value = e.target.value;
+                this.loadTrajectory(e.target.value);
             });
         }
         
@@ -340,7 +340,7 @@ class SolarTrackDemo {
         if (thetaItem) {
             // Hide theta for parallel disk OR for custom trajectories (since normals are fixed)
             if (this.currentModel === 'parallel' || 
-                (this.currentGestureData && this.currentGestureData.name === 'Custom')) {
+                (this.currentTrajectoryData && this.currentTrajectoryData.name === 'Custom')) {
                 thetaItem.style.display = 'none';
             } else {
                 thetaItem.style.display = 'flex';
@@ -367,8 +367,8 @@ class SolarTrackDemo {
     handleCustomTrajectory(trajectory3D) {
         console.log('Custom trajectory drawn with', trajectory3D.positions.length, 'points');
         
-        // Create custom gesture data
-        this.currentGestureData = {
+        // Create custom trajectory data
+        this.currentTrajectoryData = {
             name: 'Custom',
             positions: trajectory3D.positions,
             normals: trajectory3D.normals,
@@ -391,11 +391,11 @@ class SolarTrackDemo {
         // Simulate power for custom trajectory
         console.log('Simulating custom trajectory...');
         const result = simulateSolarPower(
-            this.currentGestureData.positions,
-            this.currentGestureData.normals,
+            this.currentTrajectoryData.positions,
+            this.currentTrajectoryData.normals,
             this.currentModel,
             this.lightPosition,
-            this.currentGestureData.light_source.diameter
+            this.currentTrajectoryData.light_source.diameter
         );
         
         console.log('Simulation result:', {
@@ -423,16 +423,16 @@ class SolarTrackDemo {
             unit: 'μW'
         });
         
-        this.currentGestureData.current_sim = scaledPower;
-        this.currentGestureData.current_a = result.a_values;
-        this.currentGestureData.current_H = result.H_values;
-        this.currentGestureData.sim_oriented = scaledPower;
-        this.currentGestureData.sim_parallel = scaledPower;
+        this.currentTrajectoryData.current_sim = scaledPower;
+        this.currentTrajectoryData.current_a = result.a_values;
+        this.currentTrajectoryData.current_H = result.H_values;
+        this.currentTrajectoryData.sim_oriented = scaledPower;
+        this.currentTrajectoryData.sim_parallel = scaledPower;
         
         // Update visualization with scaled power for color coding
         this.scene3d.setTrajectory(
-            this.currentGestureData.positions,
-            this.currentGestureData.normals,
+            this.currentTrajectoryData.positions,
+            this.currentTrajectoryData.normals,
             scaledPower
         );
         
@@ -440,7 +440,7 @@ class SolarTrackDemo {
         this.powerChart.updateData(
             scaledPower, // Use simulated as "real" for display
             scaledPower,
-            this.currentGestureData.sampling_rate,
+            this.currentTrajectoryData.sampling_rate,
             false,
             true // Flag for custom mode
         );
@@ -459,9 +459,9 @@ class SolarTrackDemo {
     
     handleDrawingCancel() {
         console.log('Drawing cancelled');
-        // Reset to first gesture
-        this.elements.gestureSelect.value = 'Circle';
-        this.loadGesture('Circle');
+        // Reset to first trajectory
+        this.elements.trajectorySelect.value = 'Circle';
+        this.loadTrajectory('Circle');
     }
     
     checkLightPositionModified() {
@@ -473,11 +473,11 @@ class SolarTrackDemo {
             Math.abs(this.lightPosition[2] - this.originalLightPosition[2]) > threshold;
     }
     
-    async loadGesture(gestureName) {
-        console.log(`Loading gesture: ${gestureName}...`);
+    async loadTrajectory(trajectoryName) {
+        console.log(`Loading trajectory: ${trajectoryName}...`);
         
         // Check if custom drawing mode
-        if (gestureName === 'Custom') {
+        if (trajectoryName === 'Custom') {
             this.pause();
             // Disable orientation-aware model for custom trajectories
             document.getElementById('model-oriented').disabled = true;
@@ -488,10 +488,10 @@ class SolarTrackDemo {
         }
         
         // Check if this is an uploaded file - restore from cache
-        if (gestureName === 'Uploaded') {
-            if (this.uploadedGestureCache) {
-                console.log('Restoring uploaded gesture from cache...');
-                this.loadUploadedGesture(this.uploadedGestureCache);
+        if (trajectoryName === 'Uploaded') {
+            if (this.uploadedTrajectoryCache) {
+                console.log('Restoring uploaded trajectory from cache...');
+                this.loadUploadedTrajectory(this.uploadedTrajectoryCache);
                 return;
             } else {
                 alert('Uploaded data not found. Please upload the file again.');
@@ -499,23 +499,23 @@ class SolarTrackDemo {
             }
         }
         
-        // Re-enable orientation-aware model for pre-loaded gestures
+        // Re-enable orientation-aware model for pre-loaded trajectorys
         document.getElementById('model-oriented').disabled = false;
         
         try {
             this.pause();
             
-            const response = await fetch(`./data/${gestureName.toLowerCase()}.json`);
+            const response = await fetch(`./data/${trajectoryName.toLowerCase()}.json`);
             if (!response.ok) {
-                throw new Error(`Failed to load gesture: ${response.statusText}`);
+                throw new Error(`Failed to load trajectory: ${response.statusText}`);
             }
             
-            this.currentGestureData = await response.json();
-            console.log(`✓ Loaded ${this.currentGestureData.num_samples} samples`);
+            this.currentTrajectoryData = await response.json();
+            console.log(`✓ Loaded ${this.currentTrajectoryData.num_samples} samples`);
             
             // Reset light position to default
-            this.lightPosition = [...this.currentGestureData.light_source.position];
-            this.originalLightPosition = [...this.currentGestureData.light_source.position];
+            this.lightPosition = [...this.currentTrajectoryData.light_source.position];
+            this.originalLightPosition = [...this.currentTrajectoryData.light_source.position];
             this.lightPositionModified = false;
             this.updateLightSliders();
             
@@ -530,8 +530,8 @@ class SolarTrackDemo {
             this.updateThetaVisibility();
             
         } catch (error) {
-            console.error('Error loading gesture:', error);
-            alert(`Failed to load gesture: ${error.message}`);
+            console.error('Error loading trajectory:', error);
+            alert(`Failed to load trajectory: ${error.message}`);
         }
     }
     
@@ -545,7 +545,7 @@ class SolarTrackDemo {
     }
     
     updateLightPosition() {
-        if (!this.currentGestureData) return;
+        if (!this.currentTrajectoryData) return;
         
         // Update 3D scene
         this.scene3d.updateLightPosition(this.lightPosition);
@@ -555,16 +555,16 @@ class SolarTrackDemo {
     }
     
     recomputeSimulation() {
-        if (!this.currentGestureData) return;
+        if (!this.currentTrajectoryData) return;
         
         // Determine which simulator to use
         const useExact = this.currentAccuracy === 'exact' && this.currentModel === 'oriented';
         
-        // Get effective diameter - use settings override if set, otherwise gesture's diameter
+        // Get effective diameter - use settings override if set, otherwise trajectory's diameter
         const exactSettings = getExactSettings();
         const effectiveDiameter = exactSettings.lightDiameterOverride !== null 
             ? exactSettings.lightDiameterOverride 
-            : this.currentGestureData.light_source.diameter;
+            : this.currentTrajectoryData.light_source.diameter;
         
         console.log(`Recomputing with model: ${this.currentModel}, accuracy: ${this.currentAccuracy}, useExact: ${useExact}, light: ${this.lightPosition}, diameter: ${effectiveDiameter}mm`);
         
@@ -574,8 +574,8 @@ class SolarTrackDemo {
             console.log('🔬 Using EXACT simulator (Eq. A.4)...');
             const startTime = performance.now();
             result = simulateSolarPowerExact(
-                this.currentGestureData.positions,
-                this.currentGestureData.normals,
+                this.currentTrajectoryData.positions,
+                this.currentTrajectoryData.normals,
                 this.lightPosition,
                 effectiveDiameter,
                 this.currentModel
@@ -584,8 +584,8 @@ class SolarTrackDemo {
             console.log(`🔬 Exact simulation completed in ${elapsed.toFixed(1)}ms`);
         } else {
             result = simulateSolarPower(
-                this.currentGestureData.positions,
-                this.currentGestureData.normals,
+                this.currentTrajectoryData.positions,
+                this.currentTrajectoryData.normals,
                 this.currentModel,
                 this.lightPosition,
                 effectiveDiameter
@@ -595,7 +595,7 @@ class SolarTrackDemo {
         let scaledPower;
         
         // Different scaling for custom vs real trajectories
-        if (this.currentGestureData.name === 'Custom') {
+        if (this.currentTrajectoryData.name === 'Custom') {
             // For custom, scale to a reasonable power range (20-80 μW)
             const minPower = Math.min(...result.power);
             const maxPower = Math.max(...result.power);
@@ -607,43 +607,43 @@ class SolarTrackDemo {
             } else {
                 scaledPower = result.power.map(() => 50 * 1e-6);
             }
-        } else if (this.currentGestureData.scaling_method === 'kappa' && this.currentGestureData.kappa) {
+        } else if (this.currentTrajectoryData.scaling_method === 'kappa' && this.currentTrajectoryData.kappa) {
             // For uploaded files with kappa scaling, apply kappa to new view factors
-            scaledPower = applyKappaScaling(result.power, this.currentGestureData.kappa);
-            console.log(`✓ Applied κ = ${this.currentGestureData.kappa.toExponential(3)} to recomputed simulation`);
+            scaledPower = applyKappaScaling(result.power, this.currentTrajectoryData.kappa);
+            console.log(`✓ Applied κ = ${this.currentTrajectoryData.kappa.toExponential(3)} to recomputed simulation`);
             
             // Update raw view factors for this model
             if (this.currentModel === 'oriented') {
-                this.currentGestureData.raw_view_factors_oriented = result.power;
+                this.currentTrajectoryData.raw_view_factors_oriented = result.power;
             } else {
-                this.currentGestureData.raw_view_factors_parallel = result.power;
+                this.currentTrajectoryData.raw_view_factors_parallel = result.power;
             }
         } else {
-            // For preset gestures or uploaded without kappa, scale to match real power range
+            // For preset trajectorys or uploaded without kappa, scale to match real power range
             scaledPower = applyPerSegmentScaling(
                 result.power,
-                this.currentGestureData.real_power
+                this.currentTrajectoryData.real_power
             );
         }
         
-        // Update current gesture data with new simulation
-        this.currentGestureData.current_sim = scaledPower;
-        this.currentGestureData.current_a = result.a_values;
-        this.currentGestureData.current_H = result.H_values;
+        // Update current trajectory data with new simulation
+        this.currentTrajectoryData.current_sim = scaledPower;
+        this.currentTrajectoryData.current_a = result.a_values;
+        this.currentTrajectoryData.current_H = result.H_values;
         
         // Update 3D trajectory with new power colors
         this.scene3d.setTrajectory(
-            this.currentGestureData.positions,
-            this.currentGestureData.normals,
+            this.currentTrajectoryData.positions,
+            this.currentTrajectoryData.normals,
             scaledPower  // Use new simulated power for color coding
         );
         
         // Update chart
-        const isCustom = this.currentGestureData.name === 'Custom';
+        const isCustom = this.currentTrajectoryData.name === 'Custom';
         this.powerChart.updateData(
-            isCustom ? scaledPower : this.currentGestureData.real_power,
+            isCustom ? scaledPower : this.currentTrajectoryData.real_power,
             scaledPower,
-            this.currentGestureData.sampling_rate,
+            this.currentTrajectoryData.sampling_rate,
             this.lightPositionModified && !isCustom,
             isCustom
         );
@@ -652,23 +652,23 @@ class SolarTrackDemo {
         this.updateMetrics();
         
         // Update current state display
-        if (this.currentFrame < this.currentGestureData.num_samples) {
+        if (this.currentFrame < this.currentTrajectoryData.num_samples) {
             this.updateStateDisplay(this.currentFrame);
         }
     }
     
-    loadUploadedGesture(gestureData) {
-        console.log(`Loading uploaded gesture: ${gestureData.name} (${gestureData.positions.length} samples)`);
+    loadUploadedTrajectory(trajectoryData) {
+        console.log(`Loading uploaded trajectory: ${trajectoryData.name} (${trajectoryData.positions.length} samples)`);
         
-        // Cache the uploaded gesture data for later restoration
-        this.uploadedGestureCache = gestureData;
+        // Cache the uploaded trajectory data for later restoration
+        this.uploadedTrajectoryCache = trajectoryData;
         
         this.pause();
         
-        // Prepare gesture data in the format expected by the app
-        const numSamples = gestureData.positions.length;
-        const samplingRate = gestureData.timestamps 
-            ? 1.0 / (gestureData.timestamps[1] - gestureData.timestamps[0])
+        // Prepare trajectory data in the format expected by the app
+        const numSamples = trajectoryData.positions.length;
+        const samplingRate = trajectoryData.timestamps 
+            ? 1.0 / (trajectoryData.timestamps[1] - trajectoryData.timestamps[0])
             : 30.0; // Default 30 fps
         
         // Simulate with current model - use exact if selected for oriented model
@@ -676,11 +676,11 @@ class SolarTrackDemo {
         let resultOriented;
         
         if (useExact) {
-            console.log('🔬 Using EXACT simulator for uploaded gesture...');
+            console.log('🔬 Using EXACT simulator for uploaded trajectory...');
             const startTime = performance.now();
             resultOriented = simulateSolarPowerExact(
-                gestureData.positions,
-                gestureData.normals,
+                trajectoryData.positions,
+                trajectoryData.normals,
                 this.lightPosition,
                 CONSTANTS.SOURCE_DIAMETER,
                 'oriented'
@@ -688,8 +688,8 @@ class SolarTrackDemo {
             console.log(`🔬 Exact simulation completed in ${(performance.now() - startTime).toFixed(1)}ms`);
         } else {
             resultOriented = simulateSolarPower(
-                gestureData.positions,
-                gestureData.normals,
+                trajectoryData.positions,
+                trajectoryData.normals,
                 'oriented',
                 this.lightPosition,
                 CONSTANTS.SOURCE_DIAMETER
@@ -698,8 +698,8 @@ class SolarTrackDemo {
         
         // Parallel model doesn't benefit from exact integration
         const resultParallel = simulateSolarPower(
-            gestureData.positions,
-            gestureData.normals,
+            trajectoryData.positions,
+            trajectoryData.normals,
             'parallel',
             this.lightPosition,
             CONSTANTS.SOURCE_DIAMETER
@@ -708,10 +708,10 @@ class SolarTrackDemo {
         // Scale power: Use κ-based scaling for uploaded files with real power
         let scaledOriented, scaledParallel, kappa, kappaSource, scalingMethod;
         
-        if (gestureData.real_power && gestureData.real_power.length === numSamples) {
+        if (trajectoryData.real_power && trajectoryData.real_power.length === numSamples) {
             // Calculate κ using least squares
-            kappa = calculateKappa(resultOriented.power, gestureData.real_power);
-            console.log(`✓ Calculated κ = ${kappa.toExponential(3)} for ${gestureData.name}`);
+            kappa = calculateKappa(resultOriented.power, trajectoryData.real_power);
+            console.log(`✓ Calculated κ = ${kappa.toExponential(3)} for ${trajectoryData.name}`);
             
             // Apply κ scaling
             scaledOriented = applyKappaScaling(resultOriented.power, kappa);
@@ -739,12 +739,12 @@ class SolarTrackDemo {
             scalingMethod = 'range';
         }
         
-        // Create full gesture data object
-        this.currentGestureData = {
-            name: gestureData.name,
-            positions: gestureData.positions,
-            normals: gestureData.normals,
-            real_power: gestureData.real_power, // May be null
+        // Create full trajectory data object
+        this.currentTrajectoryData = {
+            name: trajectoryData.name,
+            positions: trajectoryData.positions,
+            normals: trajectoryData.normals,
+            real_power: trajectoryData.real_power, // May be null
             sim_oriented: scaledOriented,
             sim_parallel: scaledParallel,
             current_sim: scaledOriented,
@@ -752,7 +752,7 @@ class SolarTrackDemo {
             current_H: resultOriented.H_values,
             num_samples: numSamples,
             sampling_rate: samplingRate,
-            timestamps: gestureData.timestamps,
+            timestamps: trajectoryData.timestamps,
             light_source: {
                 position: [...this.lightPosition],
                 diameter: CONSTANTS.SOURCE_DIAMETER
@@ -765,49 +765,49 @@ class SolarTrackDemo {
             isUploaded: true
         };
         
-        // Update gesture selector to show "Uploaded"
-        const gestureSelect = document.getElementById('gesture-select');
-        const mobileGestureSelect = document.getElementById('mobile-gesture-select');
+        // Update trajectory selector to show "Uploaded"
+        const trajectorySelect = document.getElementById('trajectory-select');
+        const mobileTrajectorySelect = document.getElementById('mobile-trajectory-select');
         
         // Add "Uploaded" option if not exists
-        if (!gestureSelect.querySelector('option[value="Uploaded"]')) {
+        if (!trajectorySelect.querySelector('option[value="Uploaded"]')) {
             const option = document.createElement('option');
             option.value = 'Uploaded';
-            option.textContent = gestureData.name;
-            gestureSelect.appendChild(option);
+            option.textContent = trajectoryData.name;
+            trajectorySelect.appendChild(option);
             
             const mobileOption = option.cloneNode(true);
-            mobileGestureSelect.appendChild(mobileOption);
+            mobileTrajectorySelect.appendChild(mobileOption);
         } else {
             // Update existing option text
-            gestureSelect.querySelector('option[value="Uploaded"]').textContent = gestureData.name;
-            mobileGestureSelect.querySelector('option[value="Uploaded"]').textContent = gestureData.name;
+            trajectorySelect.querySelector('option[value="Uploaded"]').textContent = trajectoryData.name;
+            mobileTrajectorySelect.querySelector('option[value="Uploaded"]').textContent = trajectoryData.name;
         }
         
-        gestureSelect.value = 'Uploaded';
-        mobileGestureSelect.value = 'Uploaded';
+        trajectorySelect.value = 'Uploaded';
+        mobileTrajectorySelect.value = 'Uploaded';
         
         // Re-enable orientation-aware model for uploaded data
         document.getElementById('model-oriented').disabled = false;
         
         // Update 3D visualization
         this.scene3d.setTrajectory(
-            this.currentGestureData.positions,
-            this.currentGestureData.normals,
-            this.currentGestureData.current_sim
+            this.currentTrajectoryData.positions,
+            this.currentTrajectoryData.normals,
+            this.currentTrajectoryData.current_sim
         );
         
         // Update chart - Show real power if available in uploaded file
         console.log('Chart update for uploaded file:', {
-            hasRealPower: this.currentGestureData.real_power !== null,
-            realPowerLength: this.currentGestureData.real_power?.length,
-            realPowerSample: this.currentGestureData.real_power?.slice(0, 3),
-            simLength: this.currentGestureData.current_sim?.length
+            hasRealPower: this.currentTrajectoryData.real_power !== null,
+            realPowerLength: this.currentTrajectoryData.real_power?.length,
+            realPowerSample: this.currentTrajectoryData.real_power?.slice(0, 3),
+            simLength: this.currentTrajectoryData.current_sim?.length
         });
         this.powerChart.updateData(
-            this.currentGestureData.real_power, // Show real power if available
-            this.currentGestureData.current_sim,
-            this.currentGestureData.sampling_rate,
+            this.currentTrajectoryData.real_power, // Show real power if available
+            this.currentTrajectoryData.current_sim,
+            this.currentTrajectoryData.sampling_rate,
             false, // No fade
             false // Not custom
         );
@@ -819,35 +819,35 @@ class SolarTrackDemo {
         this.currentFrame = 0;
         this.updateFrame();
         
-        console.log('✓ Uploaded gesture loaded successfully');
+        console.log('✓ Uploaded trajectory loaded successfully');
     }
     
     updateVisualization() {
-        if (!this.currentGestureData) return;
+        if (!this.currentTrajectoryData) return;
         
         // Use pre-computed simulation from JSON or recompute based on model
         let simulatedPower;
         if (this.currentModel === 'oriented') {
-            simulatedPower = this.currentGestureData.sim_oriented;
+            simulatedPower = this.currentTrajectoryData.sim_oriented;
         } else {
-            simulatedPower = this.currentGestureData.sim_parallel;
+            simulatedPower = this.currentTrajectoryData.sim_parallel;
         }
         
         // Store for current use
-        this.currentGestureData.current_sim = simulatedPower;
+        this.currentTrajectoryData.current_sim = simulatedPower;
         
         // Update 3D scene
         this.scene3d.setTrajectory(
-            this.currentGestureData.positions,
-            this.currentGestureData.normals,
-            this.currentGestureData.real_power
+            this.currentTrajectoryData.positions,
+            this.currentTrajectoryData.normals,
+            this.currentTrajectoryData.real_power
         );
         
         // Update chart
         this.powerChart.updateData(
-            this.currentGestureData.real_power,
+            this.currentTrajectoryData.real_power,
             simulatedPower,
-            this.currentGestureData.sampling_rate,
+            this.currentTrajectoryData.sampling_rate,
             this.lightPositionModified
         );
         
@@ -856,10 +856,10 @@ class SolarTrackDemo {
     }
     
     updateMetrics() {
-        if (!this.currentGestureData) return;
+        if (!this.currentTrajectoryData) return;
         
         // Hide metrics if light position is modified or no real power data (custom trajectory)
-        if (this.lightPositionModified || !this.currentGestureData.real_power) {
+        if (this.lightPositionModified || !this.currentTrajectoryData.real_power) {
             this.elements.metricRmse.style.display = 'none';
             this.elements.metricR2.style.display = 'none';
             this.elements.metricCorr.style.display = 'none';
@@ -871,8 +871,8 @@ class SolarTrackDemo {
         this.elements.metricR2.style.display = 'inline-block';
         this.elements.metricCorr.style.display = 'inline-block';
         
-        const real = this.currentGestureData.real_power;
-        const sim = this.currentGestureData.current_sim;
+        const real = this.currentTrajectoryData.real_power;
+        const sim = this.currentTrajectoryData.current_sim;
         
         const rmse = calculateRMSE(real, sim) * 1e6; // Convert to μW
         const r2 = calculateR2(real, sim);
@@ -887,22 +887,22 @@ class SolarTrackDemo {
     }
     
     updateStateDisplay(index) {
-        if (!this.currentGestureData || index >= this.currentGestureData.num_samples) return;
+        if (!this.currentTrajectoryData || index >= this.currentTrajectoryData.num_samples) return;
         
-        const pos = this.currentGestureData.positions[index];
-        const normal = this.currentGestureData.normals[index];
-        const power = this.currentGestureData.current_sim[index];
+        const pos = this.currentTrajectoryData.positions[index];
+        const normal = this.currentTrajectoryData.normals[index];
+        const power = this.currentTrajectoryData.current_sim[index];
         
         // Calculate a and H
-        const a = this.currentGestureData.current_a ? 
-                  this.currentGestureData.current_a[index] :
+        const a = this.currentTrajectoryData.current_a ? 
+                  this.currentTrajectoryData.current_a[index] :
                   Math.sqrt(
                       Math.pow(this.lightPosition[0] - pos[0], 2) +
                       Math.pow(this.lightPosition[2] - pos[2], 2)
                   );
         
-        const H = this.currentGestureData.current_H ?
-                  this.currentGestureData.current_H[index] :
+        const H = this.currentTrajectoryData.current_H ?
+                  this.currentTrajectoryData.current_H[index] :
                   this.lightPosition[1] - pos[1];
         
         // Calculate theta (angle between normal and upward vector)
@@ -938,10 +938,10 @@ class SolarTrackDemo {
         const kappaItem = document.getElementById('kappa-state-item');
         const kappaValue = document.getElementById('state-kappa');
         
-        if (this.currentGestureData.kappa !== null && this.currentGestureData.kappa !== undefined &&
-            this.currentGestureData.scaling_method === 'kappa') {
+        if (this.currentTrajectoryData.kappa !== null && this.currentTrajectoryData.kappa !== undefined &&
+            this.currentTrajectoryData.scaling_method === 'kappa') {
             kappaItem.style.display = 'flex';
-            kappaValue.textContent = this.currentGestureData.kappa.toExponential(2);
+            kappaValue.textContent = this.currentTrajectoryData.kappa.toExponential(2);
         } else {
             kappaItem.style.display = 'none';
         }
@@ -997,16 +997,16 @@ class SolarTrackDemo {
     }
     
     animate() {
-        if (!this.isPlaying || !this.currentGestureData) return;
+        if (!this.isPlaying || !this.currentTrajectoryData) return;
         
         // Use slower speed for custom trajectories
-        const speed = this.currentGestureData.name === 'Custom' ? 
+        const speed = this.currentTrajectoryData.name === 'Custom' ? 
                       this.animationSpeed * this.customAnimationSpeed : 
                       this.animationSpeed;
         
         this.currentFrame += speed;
         
-        if (this.currentFrame >= this.currentGestureData.num_samples) {
+        if (this.currentFrame >= this.currentTrajectoryData.num_samples) {
             this.currentFrame = 0; // Loop
         }
         
@@ -1017,7 +1017,7 @@ class SolarTrackDemo {
     }
     
     updateFrame() {
-        if (!this.currentGestureData) return;
+        if (!this.currentTrajectoryData) return;
         
         const index = Math.floor(this.currentFrame);
         
@@ -1029,16 +1029,16 @@ class SolarTrackDemo {
             // Animate chart with moving window
             this.powerChart.animateToCurrentIndex(
                 index, 
-                this.currentGestureData.sampling_rate,
-                this.currentGestureData.num_samples
+                this.currentTrajectoryData.sampling_rate,
+                this.currentTrajectoryData.num_samples
             );
         } else {
             // Just update cursor position
-            this.powerChart.setCurrentIndex(index, this.currentGestureData.sampling_rate);
+            this.powerChart.setCurrentIndex(index, this.currentTrajectoryData.sampling_rate);
         }
         
         // Update progress bar
-        const progress = (index / this.currentGestureData.num_samples) * 100;
+        const progress = (index / this.currentTrajectoryData.num_samples) * 100;
         this.elements.progressBar.style.width = `${progress}%`;
         
         // Update state display
@@ -1046,14 +1046,14 @@ class SolarTrackDemo {
     }
     
     exportPowerTraceCSV() {
-        if (!this.currentGestureData) {
-            alert('No data to export. Please load a gesture or upload motion capture data first.');
+        if (!this.currentTrajectoryData) {
+            alert('No data to export. Please load a trajectory or upload motion capture data first.');
             return;
         }
         
         console.log('Exporting power trace CSV...');
         
-        const data = this.currentGestureData;
+        const data = this.currentTrajectoryData;
         const numSamples = data.num_samples;
         
         // Generate timestamps
@@ -1072,7 +1072,7 @@ class SolarTrackDemo {
         
         // Add metadata header
         csvContent += `# SolarTrack Power Trace Export\n`;
-        csvContent += `# Gesture: ${data.name}\n`;
+        csvContent += `# Trajectory: ${data.name}\n`;
         csvContent += `# Model: ${this.currentModel === 'oriented' ? 'Orientation-aware' : 'Parallel disk'}\n`;
         csvContent += `# Light position (mm): [${this.lightPosition.map(v => v.toFixed(1)).join(', ')}]\n`;
         
@@ -1131,9 +1131,9 @@ class SolarTrackDemo {
         }
         
         // Create filename
-        const gestureName = data.name.replace(/[^a-z0-9]/gi, '_');
+        const trajectoryName = data.name.replace(/[^a-z0-9]/gi, '_');
         const modelName = this.currentModel === 'oriented' ? 'oriented' : 'parallel';
-        const filename = `power_trace_${gestureName}_${modelName}.csv`;
+        const filename = `power_trace_${trajectoryName}_${modelName}.csv`;
         
         // Download
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -1200,14 +1200,14 @@ class SolarTrackDemo {
     }
     
     openKappaModal() {
-        if (!this.currentGestureData || this.currentGestureData.kappa === null || this.currentGestureData.kappa === undefined) {
+        if (!this.currentTrajectoryData || this.currentTrajectoryData.kappa === null || this.currentTrajectoryData.kappa === undefined) {
             alert('κ configuration is only available for uploaded motion capture files with real power data.');
             return;
         }
         
         // Populate modal with current values
         document.getElementById('modal-current-kappa').textContent = 
-            this.currentGestureData.kappa.toExponential(3);
+            this.currentTrajectoryData.kappa.toExponential(3);
         
         const sourceMap = {
             'calculated': 'Calculated from real data',
@@ -1215,14 +1215,14 @@ class SolarTrackDemo {
             'physics': 'Calculated from physical parameters'
         };
         document.getElementById('modal-kappa-source').textContent = 
-            sourceMap[this.currentGestureData.kappa_source] || 'Unknown';
+            sourceMap[this.currentTrajectoryData.kappa_source] || 'Unknown';
         
         // Show calculated κ info
         document.getElementById('calculated-kappa-value').textContent = 
-            this.currentGestureData.kappa.toExponential(3);
+            this.currentTrajectoryData.kappa.toExponential(3);
         
-        if (this.currentGestureData.real_power) {
-            const rmse = calculateRMSE(this.currentGestureData.real_power, this.currentGestureData.current_sim) * 1e6;
+        if (this.currentTrajectoryData.real_power) {
+            const rmse = calculateRMSE(this.currentTrajectoryData.real_power, this.currentTrajectoryData.current_sim) * 1e6;
             document.getElementById('calculated-rmse-value').textContent = rmse.toFixed(2);
         }
         
@@ -1259,8 +1259,8 @@ class SolarTrackDemo {
         
         if (method === 'calculated') {
             // Keep current calculated kappa
-            newKappa = this.currentGestureData.kappa;
-            this.currentGestureData.kappa_source = 'calculated';
+            newKappa = this.currentTrajectoryData.kappa;
+            this.currentTrajectoryData.kappa_source = 'calculated';
         } else if (method === 'manual') {
             const input = document.getElementById('manual-kappa-input').value;
             newKappa = parseFloat(input);
@@ -1270,8 +1270,8 @@ class SolarTrackDemo {
                 return;
             }
             
-            this.currentGestureData.kappa = newKappa;
-            this.currentGestureData.kappa_source = 'manual';
+            this.currentTrajectoryData.kappa = newKappa;
+            this.currentTrajectoryData.kappa_source = 'manual';
         } else if (method === 'physics') {
             const resultText = document.getElementById('physics-kappa-result').textContent;
             if (resultText === '0.0') {
@@ -1280,11 +1280,11 @@ class SolarTrackDemo {
             }
             
             newKappa = parseFloat(resultText);
-            this.currentGestureData.kappa = newKappa;
-            this.currentGestureData.kappa_source = 'physics';
+            this.currentTrajectoryData.kappa = newKappa;
+            this.currentTrajectoryData.kappa_source = 'physics';
         }
         
-        console.log(`Applying new κ = ${this.currentGestureData.kappa.toExponential(3)} (${this.currentGestureData.kappa_source})`);
+        console.log(`Applying new κ = ${this.currentTrajectoryData.kappa.toExponential(3)} (${this.currentTrajectoryData.kappa_source})`);
         
         // Re-apply scaling and update visualization
         this.reapplyKappaScaling();
@@ -1292,36 +1292,36 @@ class SolarTrackDemo {
     }
     
     reapplyKappaScaling() {
-        if (!this.currentGestureData || !this.currentGestureData.kappa) return;
+        if (!this.currentTrajectoryData || !this.currentTrajectoryData.kappa) return;
         
         // Use stored raw view factors
         const rawViewFactors = this.currentModel === 'oriented' 
-            ? this.currentGestureData.raw_view_factors_oriented
-            : this.currentGestureData.raw_view_factors_parallel;
+            ? this.currentTrajectoryData.raw_view_factors_oriented
+            : this.currentTrajectoryData.raw_view_factors_parallel;
         
         // Apply new kappa
-        const scaledPower = applyKappaScaling(rawViewFactors, this.currentGestureData.kappa);
+        const scaledPower = applyKappaScaling(rawViewFactors, this.currentTrajectoryData.kappa);
         
-        this.currentGestureData.current_sim = scaledPower;
+        this.currentTrajectoryData.current_sim = scaledPower;
         
         // Update both sim arrays
         if (this.currentModel === 'oriented') {
-            this.currentGestureData.sim_oriented = scaledPower;
+            this.currentTrajectoryData.sim_oriented = scaledPower;
         } else {
-            this.currentGestureData.sim_parallel = scaledPower;
+            this.currentTrajectoryData.sim_parallel = scaledPower;
         }
         
         // Update visualization
         this.scene3d.setTrajectory(
-            this.currentGestureData.positions,
-            this.currentGestureData.normals,
+            this.currentTrajectoryData.positions,
+            this.currentTrajectoryData.normals,
             scaledPower
         );
         
         this.powerChart.updateData(
-            this.currentGestureData.real_power,
+            this.currentTrajectoryData.real_power,
             scaledPower,
-            this.currentGestureData.sampling_rate,
+            this.currentTrajectoryData.sampling_rate,
             false,
             false
         );
@@ -1386,8 +1386,8 @@ class SolarTrackDemo {
             this.elements.settingsAccuracyFast.checked = true;
         }
         
-        // Light diameter - use current gesture's value or default
-        const currentDiameter = this.currentGestureData?.light_source?.diameter || 100;
+        // Light diameter - use current trajectory's value or default
+        const currentDiameter = this.currentTrajectoryData?.light_source?.diameter || 100;
         const exactSettings = getExactSettings();
         this.elements.settingsLightDiameter.value = exactSettings.lightDiameterOverride || currentDiameter;
         
@@ -1445,7 +1445,7 @@ class SolarTrackDemo {
     resetSettingsToDefaults() {
         // Reset to default values
         this.elements.settingsAccuracyFast.checked = true;
-        this.elements.settingsLightDiameter.value = this.currentGestureData?.light_source?.diameter || 100;
+        this.elements.settingsLightDiameter.value = this.currentTrajectoryData?.light_source?.diameter || 100;
         this.elements.settingsGridRadial.value = DEFAULT_INTEGRATION_R;
         this.elements.settingsGridAngular.value = DEFAULT_INTEGRATION_PHI;
         this.elements.settingsColorThreshold.value = 4000;  // Default color threshold

@@ -343,14 +343,14 @@ async function main() {
     const allResults = {};
     
     for (const file of files) {
-        const gestureName = file.replace('__Synchronized.csv', '').replace('.csv', '');
-        console.log(`Processing: ${gestureName}`);
+        const trajectoryName = file.replace('__Synchronized.csv', '').replace('.csv', '');
+        console.log(`Processing: ${trajectoryName}`);
         
         const records = loadCSV(`${dataDir}/${file}`);
         const trajectory = extractTrajectory(records);
         console.log(`  Samples: ${trajectory.length}`);
         
-        allResults[gestureName] = {};
+        allResults[trajectoryName] = {};
         
         for (const config of TEST_CONFIGS) {
             const { kappa, results } = simulateTrajectory(trajectory, config);
@@ -359,12 +359,12 @@ async function main() {
             console.log(`  ${config.name}: κ=${kappa.toExponential(3)}, RMSE=${(metrics.rmse * 1e6).toFixed(2)}µW, R²=${metrics.r2.toFixed(4)}, ρ=${metrics.pearson.toFixed(4)}`);
             
             // Save individual result file
-            const outputFile = `${outputDir}/${gestureName}_${config.name}.csv`;
+            const outputFile = `${outputDir}/${trajectoryName}_${config.name}.csv`;
             const csvContent = stringify(results, { header: true });
             writeFileSync(outputFile, csvContent);
             
             // Store summary
-            allResults[gestureName][config.name] = {
+            allResults[trajectoryName][config.name] = {
                 samples: trajectory.length,
                 kappa: kappa,
                 metrics: {

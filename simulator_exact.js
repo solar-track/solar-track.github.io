@@ -28,7 +28,7 @@ export const DEFAULT_INTEGRATION_PHI = 20;   // Angular subdivisions
 export const settings = {
     integrationResolutionR: DEFAULT_INTEGRATION_R,
     integrationResolutionPhi: DEFAULT_INTEGRATION_PHI,
-    lightDiameterOverride: null  // If set, overrides gesture's light diameter
+    lightDiameterOverride: null  // If set, overrides trajectory's light diameter
 };
 
 /**
