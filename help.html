@@ -840,6 +840,43 @@
             sections.forEach(section => observer.observe(section));
         });
     </script>
+
+    <!-- Image Modal -->
+    <div class="image-modal" id="image-modal">
+        <span class="close-hint">Click anywhere to close</span>
+        <img id="modal-img" src="" alt="">
+    </div>
+
+    <script>
+        // Image modal functionality
+        (function() {
+            const modal = document.getElementById('image-modal');
+            const modalImg = document.getElementById('modal-img');
+            
+            // Get all zoomable images
+            const figures = document.querySelectorAll('.overview-figure img, .model-comparison-figure img');
+            
+            figures.forEach(img => {
+                img.addEventListener('click', function() {
+                    modal.classList.add('active');
+                    modalImg.src = this.src;
+                    modalImg.alt = this.alt;
+                });
+            });
+            
+            // Close modal on click
+            modal.addEventListener('click', function() {
+                modal.classList.remove('active');
+            });
+            
+            // Close on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    modal.classList.remove('active');
+                }
+            });
+        })();
+    </script>
 </body>
 </html>
 
