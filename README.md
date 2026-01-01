@@ -7,6 +7,10 @@
 An interactive web-based simulator for modeling power harvesting from wearable solar cells under controlled lighting conditions.
 
 <p align="center">
+  <a href="https://youtu.be/5_jUuLd6N1Q">
+    <img src="https://img.youtube.com/vi/5_jUuLd6N1Q/maxresdefault.jpg" alt="Watch Demo" width="500">
+  </a>
+  <br>
   <a href="https://youtu.be/5_jUuLd6N1Q">▶️ Watch 1-minute demo</a>
 </p>
 
