@@ -11,27 +11,25 @@ An interactive web-based simulator for modeling power harvesting from wearable s
     <img src="https://img.youtube.com/vi/5_jUuLd6N1Q/maxresdefault.jpg" alt="Watch Demo" width="500">
   </a>
   <br>
-  <a href="https://youtu.be/5_jUuLd6N1Q">▶️ Watch 1-minute demo</a>
+  <a href="https://youtu.be/5_jUuLd6N1Q">Watch 1-minute demo</a>
 </p>
 
-## Quick Start
+## Try It Online
+
+Use the simulator directly in your browser: **[solar-track.github.io](https://solar-track.github.io)**
+
+## Run Locally
+
+Requires [Node.js](https://nodejs.org/) (v16 or higher).
 
 ```bash
+git clone https://github.com/solar-track/solar-track.github.io.git
+cd solar-track.github.io
 npm install
 npm run dev
 ```
 
 Open http://localhost:3000 in your browser.
-
-## Testing
-
-Run automated tests to validate the radiometric models:
-
-```bash
-npm test
-```
-
-This runs 20 test cases (5 trajectories × 4 model configurations) against precomputed expected outputs. See [Testing Guide](public/test.html) for details.
 
 ## Features
 
@@ -42,7 +40,17 @@ This runs 20 test cases (5 trajectories × 4 model configurations) against preco
 
 ## Documentation
 
-See the [Documentation Page](public/help.html) for model equations, CSV formats, and usage guide.
+See the [Documentation Page](public/help.html) for model configurations, CSV formats, and usage guide.
+
+## Testing
+
+Run automated tests to validate the radiometric models:
+
+```bash
+npm test
+```
+
+This runs 20 test cases (5 trajectories × 4 model configurations) against precomputed expected outputs. See [Testing Guide](public/test.html) for details.
 
 ## Citation
 
