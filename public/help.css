@@ -673,6 +673,7 @@ body {
     border-radius: 6px;
     padding: 0.6rem;
     margin: 0 0 1.5rem 0;
+    position: relative;
 }
 
 .citation-box > p {
@@ -709,10 +710,9 @@ body {
 
 /* Copy button */
 .copy-btn {
-    position: sticky;
+    position: absolute;
+    top: 0.5rem;
     right: 0.5rem;
-    float: right;
-    margin-top: 0.5rem;
     background: var(--code-bg);
     border: 1px solid var(--border);
     border-radius: 4px;
