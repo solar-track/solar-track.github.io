@@ -42,10 +42,9 @@
             <!-- Navigation Sidebar -->
             <nav class="help-nav">
                 <ul>
-                    <li><a href="#automated-tests" class="nav-link active"><i class="fas fa-robot"></i> Automated Tests</a></li>
-                    <li><a href="#quick-validation" class="nav-link"><i class="fas fa-bolt"></i> Quick Validation</a></li>
+                    <li><a href="#quick-validation" class="nav-link active"><i class="fas fa-bolt"></i> Quick Validation</a></li>
                     <li><a href="#model-test" class="nav-link"><i class="fas fa-balance-scale"></i> Model Comparison</a></li>
-                    <li><a href="#csv-test" class="nav-link"><i class="fas fa-file-csv"></i> CSV Upload</a></li>
+                    <li><a href="#automated-tests" class="nav-link"><i class="fas fa-robot"></i> Automated Tests</a></li>
                 </ul>
             </nav>
 
@@ -57,6 +56,125 @@
                     
                     <p class="lead">
                         This guide helps you verify that the SolarTrack Radiometric Simulator is working correctly.
+                    </p>
+                </section>
+
+                <!-- Quick Validation -->
+                <section id="quick-validation" class="help-section">
+                    <h2><i class="fas fa-bolt"></i> Quick Validation (2 minutes)</h2>
+                    
+                    <p>Perform these checks to verify basic functionality:</p>
+
+                    <div class="steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>Start the Simulator</h4>
+                                <div class="code-block">
+                                    <code>npm install && npm run dev</code>
+                                </div>
+                                <p>Open <strong>http://localhost:3000</strong> in your browser.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>Verify Initial State</h4>
+                                <ul class="checklist">
+                                    <li><i class="fas fa-check-circle"></i> Circle trajectory visible in 3D view</li>
+                                    <li><i class="fas fa-check-circle"></i> Light source (yellow disk) visible above trajectory</li>
+                                    <li><i class="fas fa-check-circle"></i> Power chart shows two curves: Real (brown) and Simulated (orange)</li>
+                                    <li><i class="fas fa-check-circle"></i> Metrics displayed: RMSE, R², ρ</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>Test Animation</h4>
+                                <p>Click <strong>▶ Play</strong> button.</p>
+                                <ul class="checklist">
+                                    <li><i class="fas fa-check-circle"></i> Hand icon moves along the trajectory</li>
+                                    <li><i class="fas fa-check-circle"></i> Red dashed line in chart follows playback position</li>
+                                    <li><i class="fas fa-check-circle"></i> Current State panel updates (a, H, θ, Power values change)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h4>Test Light Position</h4>
+                                <p>Adjust the <strong>Y (mm)</strong> slider in the Controls panel.</p>
+                                <ul class="checklist">
+                                    <li><i class="fas fa-check-circle"></i> Light source moves in 3D view</li>
+                                    <li><i class="fas fa-check-circle"></i> Simulated power curve updates immediately</li>
+                                    <li><i class="fas fa-check-circle"></i> RMSE value changes</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="step">
+                            <div class="step-number">5</div>
+                            <div class="step-content">
+                                <h4>Test CSV Upload</h4>
+                                <p>Click <strong>Upload Motion Capture</strong> and select a CSV file.</p>
+                                <ul class="checklist">
+                                    <li><i class="fas fa-check-circle"></i> Trajectory updates in 3D view</li>
+                                    <li><i class="fas fa-check-circle"></i> Power chart recalculates with new data</li>
+                                    <li><i class="fas fa-check-circle"></i> Status message shows sample count</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="step">
+                            <div class="step-number">6</div>
+                            <div class="step-content">
+                                <h4>Test Export</h4>
+                                <p>Click the <strong>Download</strong> button (bottom-right of chart).</p>
+                                <ul class="checklist">
+                                    <li><i class="fas fa-check-circle"></i> CSV file downloads</li>
+                                    <li><i class="fas fa-check-circle"></i> File contains timestamp, simulated_power_W, a_mm, H_mm columns</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Model Comparison Test -->
+                <section id="model-test" class="help-section">
+                    <h2><i class="fas fa-balance-scale"></i> Model Comparison Test</h2>
+                    
+                    <p>
+                        This test validates the difference between the <strong>Parallel Disk</strong> and 
+                        <strong>Orientation Aware</strong> radiometric models.
+                    </p>
+
+                    <div class="info-box">
+                        <h4><i class="fas fa-lightbulb"></i> Best Test Case: Triangle Trajectory</h4>
+                        <p>
+                            The <strong>Triangle</strong> trajectory shows the clearest difference between models 
+                            because the hand tilts significantly during the motion.
+                        </p>
+                    </div>
+
+                    <h3>Test Steps</h3>
+                    <ol>
+                        <li>Select <strong>Triangle</strong> from the Trajectory dropdown</li>
+                        <li>Ensure <strong>Orientation Aware</strong> model is selected</li>
+                        <li>Observe the power curve around the peak — note the nuanced shape that closely follows the real power</li>
+                        <li>Switch to <strong>Parallel Disk</strong> model</li>
+                        <li>Observe that the curve around the peak is now <strong>smoother</strong> and less accurate</li>
+                    </ol>
+
+                    <h3>Expected Behavior</h3>
+                    <p>
+                        The <strong>Orientation Aware</strong> model produces a more nuanced power curve that follows 
+                        the real measurements more closely, especially around peaks where hand tilt is significant. 
+                        The <strong>Parallel Disk</strong> model produces a smoother curve that misses tilt-induced 
+                        variations, resulting in higher RMSE and lower R².
                     </p>
                 </section>
 
@@ -204,150 +322,6 @@ Tolerance thresholds:
                         Only regenerate if you intentionally changed the model behavior.
                     </p>
                 </section>
-
-                <!-- Quick Validation -->
-                <section id="quick-validation" class="help-section">
-                    <h2><i class="fas fa-bolt"></i> Quick Validation (2 minutes)</h2>
-                    
-                    <p>Perform these checks to verify basic functionality:</p>
-
-                    <div class="steps">
-                        <div class="step">
-                            <div class="step-number">1</div>
-                            <div class="step-content">
-                                <h4>Start the Simulator</h4>
-                                <div class="code-block">
-                                    <code>npm install && npm run dev</code>
-                                </div>
-                                <p>Open <strong>http://localhost:3000</strong> in your browser.</p>
-                            </div>
-                        </div>
-                        
-                        <div class="step">
-                            <div class="step-number">2</div>
-                            <div class="step-content">
-                                <h4>Verify Initial State</h4>
-                                <ul class="checklist">
-                                    <li><i class="fas fa-check-circle"></i> Circle trajectory visible in 3D view</li>
-                                    <li><i class="fas fa-check-circle"></i> Light source (yellow disk) visible above trajectory</li>
-                                    <li><i class="fas fa-check-circle"></i> Power chart shows two curves: Real (brown) and Simulated (orange)</li>
-                                    <li><i class="fas fa-check-circle"></i> Metrics displayed: RMSE, R², ρ</li>
-                                </ul>
-                            </div>
-                        </div>
-                        
-                        <div class="step">
-                            <div class="step-number">3</div>
-                            <div class="step-content">
-                                <h4>Test Animation</h4>
-                                <p>Click <strong>▶ Play</strong> button.</p>
-                                <ul class="checklist">
-                                    <li><i class="fas fa-check-circle"></i> Hand icon moves along the trajectory</li>
-                                    <li><i class="fas fa-check-circle"></i> Red dashed line in chart follows playback position</li>
-                                    <li><i class="fas fa-check-circle"></i> Current State panel updates (a, H, θ, Power values change)</li>
-                                </ul>
-                            </div>
-                        </div>
-                        
-                        <div class="step">
-                            <div class="step-number">4</div>
-                            <div class="step-content">
-                                <h4>Test Light Position</h4>
-                                <p>Adjust the <strong>Y (mm)</strong> slider in the Controls panel.</p>
-                                <ul class="checklist">
-                                    <li><i class="fas fa-check-circle"></i> Light source moves in 3D view</li>
-                                    <li><i class="fas fa-check-circle"></i> Simulated power curve updates immediately</li>
-                                    <li><i class="fas fa-check-circle"></i> RMSE value changes</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Model Comparison Test -->
-                <section id="model-test" class="help-section">
-                    <h2><i class="fas fa-balance-scale"></i> Model Comparison Test</h2>
-                    
-                    <p>
-                        This test validates the difference between the <strong>Parallel Disk</strong> and 
-                        <strong>Orientation Aware</strong> radiometric models.
-                    </p>
-
-                    <div class="info-box">
-                        <h4><i class="fas fa-lightbulb"></i> Best Test Case: Triangle Trajectory</h4>
-                        <p>
-                            The <strong>Triangle</strong> trajectory shows the clearest difference between models 
-                            because the hand tilts significantly during the motion.
-                        </p>
-                    </div>
-
-                    <h3>Test Steps</h3>
-                    <ol>
-                        <li>Select <strong>Triangle</strong> from the Trajectory dropdown</li>
-                        <li>Ensure <strong>Orientation Aware</strong> model is selected</li>
-                        <li>Observe the power curve around the peak — note the nuanced shape that closely follows the real power</li>
-                        <li>Switch to <strong>Parallel Disk</strong> model</li>
-                        <li>Observe that the curve around the peak is now <strong>smoother</strong> and less accurate</li>
-                    </ol>
-
-                    <h3>Expected Behavior</h3>
-                    <table class="help-table">
-                        <thead>
-                            <tr>
-                                <th>Model</th>
-                                <th>Peak Shape</th>
-                                <th>Fit Quality</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>Orientation Aware</strong></td>
-                                <td>Nuanced, follows real curve closely</td>
-                                <td>Higher R², lower RMSE</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Parallel Disk</strong></td>
-                                <td>Smoothed, misses tilt effects</td>
-                                <td>Lower R², higher RMSE</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <p class="model-note">
-                        <strong>Why?</strong> The Parallel Disk model assumes the cell always faces upward, 
-                        ignoring hand tilt. The Orientation Aware model uses the actual cell normal vector 
-                        and applies Lambert's cosine law, capturing how tilt affects power reception.
-                    </p>
-                </section>
-
-                <!-- CSV Upload Test -->
-                <section id="csv-test" class="help-section">
-                    <h2><i class="fas fa-file-csv"></i> CSV Upload Test</h2>
-                    
-                    <p>Verify that custom motion capture data can be loaded.</p>
-
-                    <h3>Test Steps</h3>
-                    <ol>
-                        <li>Click <strong>Upload Motion Capture</strong> button</li>
-                        <li>Select a CSV file with position data (see format in <a href="help.html#csv-format">Documentation</a>)</li>
-                        <li>Wait for the upload progress bar to complete</li>
-                    </ol>
-
-                    <h3>Expected Results</h3>
-                    <ul class="checklist">
-                        <li><i class="fas fa-check-circle"></i> Trajectory updates in 3D view</li>
-                        <li><i class="fas fa-check-circle"></i> Power chart recalculates with new data</li>
-                        <li><i class="fas fa-check-circle"></i> If CSV contains power data, Real curve updates</li>
-                        <li><i class="fas fa-check-circle"></i> Status message shows sample count</li>
-                    </ul>
-
-                    <h3>Export Test</h3>
-                    <ol>
-                        <li>Click the <strong>Download</strong> button (bottom-right of chart)</li>
-                        <li>Verify CSV file is downloaded</li>
-                        <li>Open the file — should contain timestamp, simulated_power_W, a_mm, H_mm columns</li>
-                    </ol>
-                </section>
             </main>
         </div>
 
@@ -393,4 +367,3 @@ Tolerance thresholds:
     </script>
 </body>
 </html>
-
