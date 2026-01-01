@@ -57,7 +57,7 @@
                     <h2><i class="fas fa-home"></i> Overview</h2>
                     
                     <figure class="overview-figure">
-                        <img src="/assets/solartrack_overview_doc.png" alt="SolarTrack Overview: Trajectory data flows into the radiometric simulator, producing solar power predictions over time">
+                        <img src="/assets/solartrack_overview_doc.png" alt="SolarTrack Overview: Trajectory data flows into the radiometric simulator, producing solar power predictions over time" class="zoomable">
                     </figure>
 
                     <p class="lead">
@@ -478,7 +478,7 @@
                     </div>
 
                     <figure class="model-comparison-figure">
-                        <img src="/assets/orientation_vs_parallel_smple.png" alt="Power curve comparison between Orientation Aware and Parallel Disk models">
+                        <img src="/assets/orientation_vs_parallel_smple.png" alt="Power curve comparison between Orientation Aware and Parallel Disk models" class="zoomable">
                         <figcaption>Triangle trajectory: Orientation Aware (left) captures tilt-induced variations with higher R², while Parallel Disk (right) produces a smoother curve that misses these details.</figcaption>
                     </figure>
                 </section>
@@ -854,7 +854,7 @@
             const modalImg = document.getElementById('modal-img');
             
             // Get all zoomable images
-            const figures = document.querySelectorAll('.overview-figure img, .model-comparison-figure img');
+            const figures = document.querySelectorAll('img.zoomable');
             
             figures.forEach(img => {
                 img.addEventListener('click', function() {
